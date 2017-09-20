@@ -1,0 +1,83 @@
+= Request validation Policy
+
+ifdef::env-github[]
+image:https://ci.gravitee.io/buildStatus/icon?job=gravitee-io/gravitee-policy-request-validation/master["Build status", link="https://ci.gravitee.io/buildStatus/icon?job=gravitee-io/gravitee-policy-request-validation/master/"]
+image:https://badges.gitter.im/Join Chat.svg["Gitter", link="https://gitter.im/gravitee-io/gravitee-io?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
+endif::[]
+
+== Phase
+
+[cols="2*", options="header"]
+|===
+^|onRequest
+^|onResponse
+
+^.^| X
+^.^|
+
+|===
+
+== Description
+
+The `request validation` policy is used to validate the incoming HTTP request according to given rules.
+A rule is defined for an input value. This input value supports EL expression and is validated against to constraint
+rules.
+
+Constraint rules can be:
+
+* NOT_NULL: Input value is required
+* MIN: Input value is a number and its value is greater or equals to a given parameter.
+* MAX: Input value is a number and its value is lower or equals to a given parameter.
+* MAIL: Input value is valid according to the mail pattern.
+* PATTERN: Input value is valid according to the pattern given as a parameter.
+* SIZE: Input value length is between two given parameters.
+
+By default, if one of the rule can not be validated, the policy returns a `400` status code.
+
+== Configuration
+
+|===
+|Property |Required |Description |Type |Default
+
+.^|status
+^.^|X
+|HTTP Status Code send to the consumer in case of validation issues
+^.^|HTTP status code
+^.^|400
+
+.^|rules
+^.^|X
+|Rules to apply to incoming request
+^.^|List of rules
+^.^|-
+
+|===
+
+[source, json]
+.Sample
+----
+"policy-request-validation": {
+    "rules": [
+        {
+            "constraint": {
+                "parameters": [
+                    ".*\\\\.(txt)$"
+                ],
+                "type": "PATTERN"
+            },
+            "input": "{#request.pathInfos[2]}"
+        }
+    ],
+    "status": "400"
+}
+----
+
+== Http Status Code
+
+|===
+|Code |Message
+
+.^| ```400```
+| Incoming HTTP request can not be validated.
+
+|===
