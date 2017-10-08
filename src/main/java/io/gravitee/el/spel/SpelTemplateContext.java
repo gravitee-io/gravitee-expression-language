@@ -22,7 +22,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import io.gravitee.el.spel.function.JsonPathFunction;
 
 /**
- * @author David BRASSELY (david at gravitee.io)
+ * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
 public class SpelTemplateContext implements TemplateContext {
