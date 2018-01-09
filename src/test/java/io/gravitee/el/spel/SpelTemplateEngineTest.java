@@ -216,4 +216,31 @@ public class SpelTemplateEngineTest {
 
     }
 
+    @Test
+    public void shouldJsonPathFunctionGroupsForBoolean() {
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("profile", "{ \"lastname\": \"DOE\", \"firstname\": \"JOHN\", \"age\": 35"
+                + ", \"groups\" : [\"Group1\", \"Group2\", \"Group3\"]"
+                + ", \"emptiness\" : []"
+                + ", \"nothingness\" : null"
+                + " }");
+
+        String content = "{#jsonPath(#profile, '$.groups').contains('Group2')}";
+        boolean result = engine.getValue(content , boolean.class);
+        Assert.assertTrue(result);
+
+        content = "{#jsonPath(#profile, '$.groups').contains('Group4')}";
+        result = engine.getValue(content , boolean.class);
+        Assert.assertFalse(result);
+
+        content = "{#jsonPath(#profile, '$.emptiness').contains('Group4')}";
+        result = engine.getValue(content , boolean.class);
+        Assert.assertFalse(result);
+
+        content = "{#jsonPath(#profile, '$.nothingness')?.contains('Group4')?:false}";
+        result = engine.getValue(content , boolean.class);
+        Assert.assertFalse(result);
+    }
+    
 }
