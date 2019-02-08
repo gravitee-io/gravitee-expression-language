@@ -18,7 +18,10 @@ package io.gravitee.el.spel;
 import io.gravitee.el.TemplateContext;
 import io.gravitee.el.TemplateEngine;
 import org.springframework.expression.Expression;
+import org.springframework.expression.ParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+
+import java.util.regex.Pattern;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -27,8 +30,10 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 public class SpelTemplateEngine implements TemplateEngine {
 
     private static final String EXPRESSION_REGEX = "\\{([^#|T|(])";
+    private static final Pattern EXPRESSION_REGEX_PATTERN = Pattern.compile(EXPRESSION_REGEX);
     private static final String EXPRESSION_REGEX_SUBSTITUTE = "{'{'}$1";
 
+    private static final ParserContext PARSER_CONTEXT = new TemplateParserContext();
     private final SpelTemplateContext templateContext = new SpelTemplateContext();
 
     @Override
@@ -37,9 +42,9 @@ public class SpelTemplateEngine implements TemplateEngine {
     }
 
     private Expression parseExpression(String expression) {
-        // Escape sequence
-        final String replaced = expression.replaceAll(EXPRESSION_REGEX, EXPRESSION_REGEX_SUBSTITUTE);
-        return new SpelExpressionParser().parseExpression(replaced, new TemplateParserContext());
+        return new SpelExpressionParser().parseExpression(
+                EXPRESSION_REGEX_PATTERN.matcher(expression).replaceAll(EXPRESSION_REGEX_SUBSTITUTE),
+                PARSER_CONTEXT);
     }
 
     private <T> T getValue(Expression expression, Class<T> clazz) {
