@@ -16,9 +16,10 @@
 package io.gravitee.el;
 
 /**
- * @author Christophe LANNOY (chrislannoy.java at gmail.com)
+ * @author David BRASSELY (david.brassely at graviteesource.com)
+ * @author GraviteeSource Team
  */
-public interface TemplateEngineFactory {
+public interface TemplateVariableProvider {
 
-    TemplateEngine templateEngine();
+    void provide(TemplateContext context);
 }
