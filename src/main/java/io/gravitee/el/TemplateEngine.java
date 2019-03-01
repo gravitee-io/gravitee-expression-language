@@ -27,7 +27,10 @@ public interface TemplateEngine {
         return factory.templateEngine();
     }
 
-    String convert(String expression);
+    @Deprecated
+    default String convert(String expression) {
+        return getValue(expression, String.class);
+    }
 
     <T> T getValue(String expression, Class<T> clazz);
 
