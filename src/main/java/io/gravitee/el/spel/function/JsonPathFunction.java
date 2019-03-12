@@ -19,6 +19,8 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.Predicate;
+import com.jayway.jsonpath.spi.cache.CacheProvider;
+import com.jayway.jsonpath.spi.cache.NOOPCache;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +41,7 @@ public final class JsonPathFunction {
     static {
         Configuration configuration = Configuration.defaultConfiguration();
         CONFIGURATION = configuration.addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
+        CacheProvider.setCache(new NOOPCache());
     }
 
     private JsonPathFunction() {
