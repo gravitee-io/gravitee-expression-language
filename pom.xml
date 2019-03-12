@@ -102,7 +102,7 @@
     </dependencies>
 
     <properties>
-        <json-path.version>2.2.0</json-path.version>
+        <json-path.version>2.4.0</json-path.version>
         <gravitee-common.version>1.13.0</gravitee-common.version>
         <jmh.version>1.21</jmh.version>
     </properties>
