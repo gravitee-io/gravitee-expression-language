@@ -28,6 +28,7 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -210,6 +211,32 @@ public class SpelTemplateEngineTest {
         String content = "age: {(T(java.lang.Math).random() * 60).intValue()}";
         String value = engine.convert(content);
         Assert.assertNotNull(value);
+    }
+
+    @Test
+    public void shouldXpathFunction() {
+        EvaluableRequest req = Mockito.mock(EvaluableRequest.class);
+        when(req.getContent()).thenReturn("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<root>" +
+                "<lastname>DOE</lastname>" +
+                "<firstname>JOHN</firstname>" +
+                "<age>35</age>" +
+                "</root>");
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", req);
+
+        String content = "{#xpath(#request.content, './/lastname')}";
+        String value = engine.convert(content);
+        Assert.assertEquals("DOE", value);
+
+        content = "{#xpath(#request.content, './/age', 'number') + 20}";
+        value = engine.convert(content);
+        Assert.assertEquals("55.0", value);
+
+        content = "{#xpath(#request.content, './/something')}";
+        value = engine.convert(content);
+        Assert.assertTrue(StringUtils.isEmpty(value));
     }
 
     @Test
