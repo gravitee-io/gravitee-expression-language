@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.el.spel;
+package io.gravitee.el.spel.context;
 
 import io.gravitee.el.TemplateContext;
+import io.gravitee.el.spel.function.JsonPathFunction;
 import org.springframework.beans.BeanUtils;
 import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
-import io.gravitee.el.spel.function.JsonPathFunction;
 import org.springframework.integration.xml.xpath.XPathUtils;
-
-import javax.xml.xpath.XPathFunction;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -30,12 +27,15 @@ import javax.xml.xpath.XPathFunction;
  */
 public class SpelTemplateContext implements TemplateContext {
 
-    private final StandardEvaluationContext context = new StandardEvaluationContext();
+    private final EvaluationContext context;
 
     public SpelTemplateContext() {
-        context.registerFunction("jsonPath",
+
+        context = new SecuredEvaluationContext();
+
+        context.setVariable("jsonPath",
                 BeanUtils.resolveSignature("evaluate", JsonPathFunction.class));
-        context.registerFunction("xpath",
+        context.setVariable("xpath",
                 BeanUtils.resolveSignature("evaluate", XPathUtils.class));
     }
 

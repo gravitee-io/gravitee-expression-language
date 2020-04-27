@@ -17,8 +17,11 @@ package io.gravitee.el.spel;
 
 import io.gravitee.el.TemplateContext;
 import io.gravitee.el.TemplateEngine;
+import io.gravitee.el.spel.context.SpelTemplateContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParserContext;
+import org.springframework.expression.spel.SpelCompilerMode;
+import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.regex.Pattern;
@@ -32,8 +35,9 @@ public class SpelTemplateEngine implements TemplateEngine {
     private static final String EXPRESSION_REGEX = "\\{([^#|T|(])";
     private static final Pattern EXPRESSION_REGEX_PATTERN = Pattern.compile(EXPRESSION_REGEX);
     private static final String EXPRESSION_REGEX_SUBSTITUTE = "{'{'}$1";
-
     private static final ParserContext PARSER_CONTEXT = new TemplateParserContext();
+    private static final SpelExpressionParser EXPRESSION_PARSER = new SpelExpressionParser(new SpelParserConfiguration(SpelCompilerMode.MIXED, null));
+
     private final SpelTemplateContext templateContext = new SpelTemplateContext();
 
     @Override
@@ -42,7 +46,8 @@ public class SpelTemplateEngine implements TemplateEngine {
     }
 
     private Expression parseExpression(String expression) {
-        return new SpelExpressionParser().parseExpression(
+
+        return EXPRESSION_PARSER.parseExpression(
                 EXPRESSION_REGEX_PATTERN.matcher(expression).replaceAll(EXPRESSION_REGEX_SUBSTITUTE),
                 PARSER_CONTEXT);
     }
