@@ -1,0 +1,65 @@
+# Allows by class.
+class java.lang.Math
+class java.lang.String
+class java.lang.Integer
+class java.lang.Double
+class java.lang.Long
+class java.math.BigDecimal
+class java.lang.Float
+class java.lang.Short
+class java.util.Date
+class java.time.LocalDate
+class java.time.LocalDateTime
+class java.time.ZonedDateTime
+class java.time.format.DateTimeFormatter
+class java.util.Calendar
+
+# Allows by method signatures
+method java.lang.Object equals java.lang.Object
+method java.lang.Object hashCode
+method java.lang.Object toString
+method java.lang.System currentTimeMillis
+method java.lang.System nanoTime
+method java.net.URLDecoder decode java.lang.String java.lang.String
+method java.net.URLEncoder encode java.lang.String java.lang.String
+method java.util.Collections binarySearch java.util.List java.lang.Object
+method java.util.Collections binarySearch java.util.List java.lang.Object java.util.Comparator
+method java.util.Collections disjoint java.util.Collection java.util.Collection
+method java.util.Collections frequency java.util.Collection java.lang.Object
+method java.util.Collections indexOfSubList java.util.List java.util.List
+method java.util.Collections lastIndexOfSubList java.util.List java.util.List
+method java.util.Collections max java.util.Collection
+method java.util.Collections max java.util.Collection java.util.Comparator
+method java.util.Collections min java.util.Collection
+method java.util.Collections min java.util.Collection java.util.Comparator
+method java.util.Comparator compare java.lang.Object java.lang.Object
+method java.util.Collection contains java.lang.Object
+method java.util.Collection isEmpty
+method java.util.Collection size
+method java.util.List get int
+method java.util.Deque getFirst
+method java.util.Deque peek
+method java.util.Deque peekFirst
+method java.util.Deque peekLast
+method java.util.Deque element
+method java.util.Map containsKey java.lang.Object
+method java.util.Map containsValue java.lang.Object
+method java.util.Map entrySet
+method java.util.Map get java.lang.Object
+method java.util.Map getOrDefault java.lang.Object java.lang.Object
+method java.util.Map isEmpty
+method java.util.Map keySet
+method java.util.Map size
+method java.util.Map values
+method java.util.Map$Entry getKey
+method java.util.Map$Entry getValue
+method java.util.Random nextBoolean
+method java.util.Random nextBytes byte[]
+method java.util.Random nextDouble
+method java.util.Random nextFloat
+method java.util.Random nextGaussian
+method java.util.Random nextInt
+method java.util.Random nextInt int
+method java.util.Random nextLong
+method java.util.TimeZone getTimeZone java.lang.String
+method java.util.UUID randomUUID

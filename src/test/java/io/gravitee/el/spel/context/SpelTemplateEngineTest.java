@@ -13,28 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.el.spel;
+package io.gravitee.el.spel.context;
 
 import io.gravitee.common.http.HttpHeaders;
 import io.gravitee.common.util.LinkedMultiValueMap;
 import io.gravitee.common.util.MultiValueMap;
 import io.gravitee.el.TemplateEngine;
+import io.gravitee.el.spel.EvaluableRequest;
+import io.gravitee.el.spel.Request;
+import io.gravitee.el.spel.context.SecuredEvaluationContext;
+import io.gravitee.el.spel.context.SecuredMethodResolver;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.MutablePropertySources;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.mock.env.MockEnvironment;
+import org.springframework.mock.env.MockPropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
+import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_LIST_KEY;
+import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_MODE_KEY;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -50,6 +63,9 @@ public class SpelTemplateEngineTest {
     @Before
     public void init() {
         initMocks(this);
+
+        ReflectionTestUtils.setField(SecuredMethodResolver.getInstance(), "methodsByTypeAndSuperTypes", new ConcurrentHashMap<>());
+        SecuredMethodResolver.initialize(null);
     }
 
     @Test
@@ -68,7 +84,7 @@ public class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
         String value = engine.convert("{#request.headers['X-Gravitee-Endpoint']}");
-        Assert.assertEquals("my_api_host", value);
+        assertEquals("my_api_host", value);
     }
 
     @Test
@@ -88,8 +104,8 @@ public class SpelTemplateEngineTest {
 
         EvaluableRequest value = engine.getValue("{#request}", EvaluableRequest.class);
         HttpHeaders headersValue = engine.getValue("{#request.headers}", HttpHeaders.class);
-        Assert.assertEquals("my_api_host", value.getHeaders().getFirst("X-Gravitee-Endpoint"));
-        Assert.assertEquals("my_api_host", headersValue.getFirst("X-Gravitee-Endpoint"));
+        assertEquals("my_api_host", value.getHeaders().getFirst("X-Gravitee-Endpoint"));
+        assertEquals("my_api_host", headersValue.getFirst("X-Gravitee-Endpoint"));
     }
 
     @Test
@@ -104,7 +120,7 @@ public class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
         String value = engine.convert("{#request.params['param']}");
-        Assert.assertEquals("myparam", value);
+        assertEquals("myparam", value);
     }
 
     @Test
@@ -120,8 +136,8 @@ public class SpelTemplateEngineTest {
 
         EvaluableRequest value = engine.getValue("{#request}", EvaluableRequest.class);
         MultiValueMap<String, String> paramsValue = engine.getValue("{#request.params}", MultiValueMap.class);
-        Assert.assertEquals("myparam", value.getParams().getFirst("param"));
-        Assert.assertEquals("myparam", paramsValue.getFirst("param"));
+        assertEquals("myparam", value.getParams().getFirst("param"));
+        assertEquals("myparam", paramsValue.getFirst("param"));
     }
 
     @Test
@@ -136,7 +152,7 @@ public class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
         String value = engine.convert("{#request.params['param'][1]}");
-        Assert.assertEquals("myparam2", value);
+        assertEquals("myparam2", value);
     }
 
     @Test
@@ -152,8 +168,8 @@ public class SpelTemplateEngineTest {
 
         EvaluableRequest value = engine.getValue("{#request}", EvaluableRequest.class);
         MultiValueMap<String, String> paramsValue = engine.getValue("{#request.params}", MultiValueMap.class);
-        Assert.assertEquals("myparam2", value.getParams().get("param").get(1));
-        Assert.assertEquals("myparam2", paramsValue.get("param").get(1));
+        assertEquals("myparam2", value.getParams().get("param").get(1));
+        assertEquals("myparam2", paramsValue.get("param").get(1));
     }
 
     @Test
@@ -177,7 +193,7 @@ public class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("properties", properties);
 
         String value = engine.convert("<user><id>{#request.paths[2]}</id><name>{#properties['name_123']}</name><firstname>{#properties['firstname_' + #request.paths[2]]}</firstname></user>");
-        Assert.assertNotNull(value);
+        assertNotNull(value);
     }
 
     @Test
@@ -202,7 +218,7 @@ public class SpelTemplateEngineTest {
 
         String content = "[{id: {#request.paths[2]}, firstname: {#properties['firstname_123']}, name: {#properties['name_123']}, age: 0}]";
         String value = engine.convert(content);
-        Assert.assertNotNull(value);
+        assertNotNull(value);
     }
 
     @Test
@@ -210,7 +226,7 @@ public class SpelTemplateEngineTest {
         TemplateEngine engine = TemplateEngine.templateEngine();
         String content = "age: {(T(java.lang.Math).random() * 60).intValue()}";
         String value = engine.convert(content);
-        Assert.assertNotNull(value);
+        assertNotNull(value);
     }
 
     @Test
@@ -228,15 +244,15 @@ public class SpelTemplateEngineTest {
 
         String content = "{#xpath(#request.content, './/lastname')}";
         String value = engine.convert(content);
-        Assert.assertEquals("DOE", value);
+        assertEquals("DOE", value);
 
         content = "{#xpath(#request.content, './/age', 'number') + 20}";
         value = engine.convert(content);
-        Assert.assertEquals("55.0", value);
+        assertEquals("55.0", value);
 
         content = "{#xpath(#request.content, './/something')}";
         value = engine.convert(content);
-        Assert.assertTrue(StringUtils.isEmpty(value));
+        assertTrue(StringUtils.isEmpty(value));
     }
 
     @Test
@@ -249,11 +265,11 @@ public class SpelTemplateEngineTest {
 
         String content = "{#jsonPath(#request.content, '$.lastname')}";
         String value = engine.convert(content);
-        Assert.assertEquals("DOE", value);
+        assertEquals("DOE", value);
 
         content = "{#jsonPath(#request.content, '$.age') + 20}";
         value = engine.convert(content);
-        Assert.assertEquals("55", value);
+        assertEquals("55", value);
 
         content = "{#jsonPath(#request.content, '$.something')}";
         value = engine.convert(content);
@@ -275,7 +291,7 @@ public class SpelTemplateEngineTest {
 
         boolean success = expr.getValue(context, boolean.class);
 
-        Assert.assertTrue(success);
+        assertTrue(success);
     }
 
     @Test
@@ -285,17 +301,16 @@ public class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("profile", "{ \"lastname\": \"DOE\", \"firstname\": \"JOHN\", \"age\": 35 }");
 
         String content = "{#jsonPath(#profile, '$.identity_provider_id') == 'idp_6'}";
-        boolean result = engine.getValue(content , boolean.class);
+        boolean result = engine.getValue(content, boolean.class);
         Assert.assertFalse(result);
 
         content = "{#jsonPath(#profile, '$.lastname') == 'DOE'}";
-        result = engine.getValue(content , boolean.class);
-        Assert.assertTrue(result);
+        result = engine.getValue(content, boolean.class);
+        assertTrue(result);
 
         content = "{#jsonPath(#profile, '$.lastname') == 'DONE'}";
-        result = engine.getValue(content , boolean.class);
+        result = engine.getValue(content, boolean.class);
         Assert.assertFalse(result);
-
     }
 
     @Test
@@ -309,20 +324,141 @@ public class SpelTemplateEngineTest {
                 + " }");
 
         String content = "{#jsonPath(#profile, '$.groups').contains('Group2')}";
-        boolean result = engine.getValue(content , boolean.class);
-        Assert.assertTrue(result);
+        boolean result = engine.getValue(content, boolean.class);
+        assertTrue(result);
 
         content = "{#jsonPath(#profile, '$.groups').contains('Group4')}";
-        result = engine.getValue(content , boolean.class);
+        result = engine.getValue(content, boolean.class);
         Assert.assertFalse(result);
 
         content = "{#jsonPath(#profile, '$.emptiness').contains('Group4')}";
-        result = engine.getValue(content , boolean.class);
+        result = engine.getValue(content, boolean.class);
         Assert.assertFalse(result);
 
         content = "{#jsonPath(#profile, '$.nothingness')?.contains('Group4')?:false}";
-        result = engine.getValue(content , boolean.class);
+        result = engine.getValue(content, boolean.class);
         Assert.assertFalse(result);
     }
-    
+
+    @Test(expected = SpelEvaluationException.class)
+    public void shouldNotAllowedClassMethod() {
+
+        String expression = "{T(java.lang.Class).forName('java.lang.Math')}";
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        engine.getValue(expression, Object.class);
+    }
+
+    @Test
+    public void shouldAllowMathMethod() {
+
+        String expression = "{T(java.lang.Math).abs(60)}";
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        assertEquals((Integer) 60, engine.getValue(expression, Integer.class));
+    }
+
+    @Test(expected = SpelEvaluationException.class)
+    public void shouldNotAllowAddParam() {
+
+        when(request.parameters()).thenReturn(new LinkedMultiValueMap<>());
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        engine.getValue("{#request.params.add('test', 'test')}", String.class);
+    }
+
+    @Test(expected = SpelEvaluationException.class)
+    public void shouldNotAllowRemoveParam() {
+
+        when(request.parameters()).thenReturn(new LinkedMultiValueMap<>());
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        engine.getValue("{#request.params.remove('test')}", String.class);
+    }
+
+    @Test(expected = SpelEvaluationException.class)
+    public void shouldNotAllowToAddHeader() {
+
+        when(request.headers()).thenReturn(new HttpHeaders());
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        engine.getValue("{#request.headers.add('X-Gravitee-Endpoint', 'test')}", String.class);
+    }
+
+    @Test(expected = SpelEvaluationException.class)
+    public void shouldNotAllowToRemoveHeader() {
+
+        when(request.headers()).thenReturn(new HttpHeaders());
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        engine.getValue("{#request.headers.remove('X-Gravitee-Endpoint')}", String.class);
+    }
+
+    @Test
+    public void shouldAllowMethodFromSuperType() {
+
+        ArrayList<String> list = new ArrayList<>();
+        list.add("test");
+
+        LinkedList<String> linkedList = new LinkedList<>();
+        linkedList.add("test");
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("list", list);
+        engine.getTemplateContext().setVariable("linkedList", linkedList);
+
+        assertTrue(engine.getValue("{# list.contains('test') and #linkedList.contains('test')}", Boolean.class));
+    }
+
+    @Test
+    public void shouldAllowMethodFromConfiguration() {
+
+        ConfigurableEnvironment environment = new MockEnvironment()
+                .withProperty(EL_WHITELIST_MODE_KEY, "append")
+                .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "method java.lang.System getenv");
+
+        SecuredMethodResolver.initialize(environment);
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        assertEquals(System.getenv(), engine.getValue("{(T(java.lang.System)).getenv()}", Map.class));
+    }
+
+    @Test(expected = SpelEvaluationException.class)
+    public void shouldNotAllowMethodWhenBuiltInWhitelistNotLoaded() {
+
+        ConfigurableEnvironment environment = new MockEnvironment()
+                .withProperty(EL_WHITELIST_MODE_KEY, "replace") // The configured whitelist replaces the built-in (doesn't contains Math.abs(int) method).
+                .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "method java.lang.System getenv");
+
+        SecuredMethodResolver.initialize(environment);
+
+        String expression = "{T(java.lang.Math).abs(60)}";
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        engine.getValue(expression, Object.class);
+    }
+
+    @Test
+    public void shouldIgnoreUnkownWhitelistedClassesOrMethods() {
+
+        ConfigurableEnvironment environment = new MockEnvironment()
+                .withProperty(EL_WHITELIST_MODE_KEY, "append")
+                .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "class io.gravitee.Unknown")
+                .withProperty(EL_WHITELIST_LIST_KEY + "[1]", "method java.lang.Math unknown");
+
+        SecuredMethodResolver.initialize(environment);
+
+        String expression = "{T(java.lang.Math).abs(60)}";
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        assertEquals((Integer) 60, engine.getValue(expression, Integer.class));
+    }
 }
