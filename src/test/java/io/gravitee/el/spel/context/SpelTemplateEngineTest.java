@@ -63,8 +63,6 @@ public class SpelTemplateEngineTest {
     @Before
     public void init() {
         initMocks(this);
-
-        ReflectionTestUtils.setField(SecuredMethodResolver.getInstance(), "methodsByTypeAndSuperTypes", new ConcurrentHashMap<>());
         SecuredMethodResolver.initialize(null);
     }
 

@@ -57,9 +57,8 @@ public class SecuredMethodResolver extends ReflectiveMethodResolver {
     public static final String WHITELIST_CLASS_PREFIX = "class ";
 
     private static SecuredMethodResolver INSTANCE;
-    private static Map<Class<?>, Method[]> methodsByType;
-
-    private final Map<Class<?>, Method[]> methodsByTypeAndSuperTypes;
+    private final static Map<Class<?>, Method[]> methodsByType = new ConcurrentHashMap<>();
+    private final static Map<Class<?>, Method[]> methodsByTypeAndSuperTypes = new ConcurrentHashMap<>();
 
     /**
      * Initialize the method resolver loading all whitelisted methods from environment configuration and / or built-in whitelist.
@@ -70,12 +69,14 @@ public class SecuredMethodResolver extends ReflectiveMethodResolver {
     public static void initialize(@Nullable Environment environment) {
 
         loadWhitelistMethods(environment);
+
+        // Force instance creation if not already done.
+        getInstance();
     }
 
     static SecuredMethodResolver getInstance() {
 
-        if(INSTANCE == null) {
-            initialize(null);
+        if (INSTANCE == null) {
             INSTANCE = new SecuredMethodResolver();
         }
 
@@ -83,9 +84,6 @@ public class SecuredMethodResolver extends ReflectiveMethodResolver {
     }
 
     private SecuredMethodResolver() {
-
-        // Act as a unique cache.
-        methodsByTypeAndSuperTypes = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -143,11 +141,14 @@ public class SecuredMethodResolver extends ReflectiveMethodResolver {
             }
         }
 
-        methodsByType = methods.stream()
+        methodsByType.clear();
+        methodsByType.putAll(methods.stream()
                 .collect(Collectors.groupingBy(Method::getDeclaringClass))
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().toArray(EMPTY)));
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().toArray(EMPTY))));
+
+        methodsByTypeAndSuperTypes.clear();
     }
 
     private static void parseDeclaration(String declaration, List<Method> methods) {
