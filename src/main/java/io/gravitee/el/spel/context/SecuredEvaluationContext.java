@@ -30,13 +30,13 @@ import java.util.Map;
 public class SecuredEvaluationContext implements EvaluationContext {
 
     // No constructor resolver to avoid object instantiation.
-    private static final List<ConstructorResolver> constructorResolvers = Collections.emptyList();
+    private static final List<ConstructorResolver> constructorResolvers = Collections.singletonList(new SecuredContructorResolver());
 
     // Read only property access.
     private static final List<PropertyAccessor> propertyAccessors = Collections.singletonList(DataBindingPropertyAccessor.forReadOnlyAccess());
 
     // Secure method resolver to allow only whitelisted methods.
-    private static final List<MethodResolver> methodResolvers = Collections.singletonList(SecuredMethodResolver.getInstance());
+    private static final List<MethodResolver> methodResolvers = Collections.singletonList(new SecuredMethodResolver());
 
     // Standards.
     private static final TypeLocator typeLocator = new StandardTypeLocator();
