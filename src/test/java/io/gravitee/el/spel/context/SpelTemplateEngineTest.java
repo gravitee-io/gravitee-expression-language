@@ -19,31 +19,23 @@ import io.gravitee.common.http.HttpHeaders;
 import io.gravitee.common.util.LinkedMultiValueMap;
 import io.gravitee.common.util.MultiValueMap;
 import io.gravitee.el.TemplateEngine;
+import io.gravitee.el.exceptions.ExpressionEvaluationException;
 import io.gravitee.el.spel.EvaluableRequest;
 import io.gravitee.el.spel.Request;
-import io.gravitee.el.spel.context.SecuredEvaluationContext;
-import io.gravitee.el.spel.context.SecuredMethodResolver;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.MutablePropertySources;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.mock.env.MockEnvironment;
-import org.springframework.mock.env.MockPropertySource;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_LIST_KEY;
 import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_MODE_KEY;
@@ -63,7 +55,7 @@ public class SpelTemplateEngineTest {
     @Before
     public void init() {
         initMocks(this);
-        SecuredMethodResolver.initialize(null);
+        SecuredResolver.initialize(null);
     }
 
     @Test
@@ -338,7 +330,7 @@ public class SpelTemplateEngineTest {
         Assert.assertFalse(result);
     }
 
-    @Test(expected = SpelEvaluationException.class)
+    @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowedClassMethod() {
 
         String expression = "{T(java.lang.Class).forName('java.lang.Math')}";
@@ -356,7 +348,7 @@ public class SpelTemplateEngineTest {
         assertEquals((Integer) 60, engine.getValue(expression, Integer.class));
     }
 
-    @Test(expected = SpelEvaluationException.class)
+    @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowAddParam() {
 
         when(request.parameters()).thenReturn(new LinkedMultiValueMap<>());
@@ -367,7 +359,7 @@ public class SpelTemplateEngineTest {
         engine.getValue("{#request.params.add('test', 'test')}", String.class);
     }
 
-    @Test(expected = SpelEvaluationException.class)
+    @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowRemoveParam() {
 
         when(request.parameters()).thenReturn(new LinkedMultiValueMap<>());
@@ -378,7 +370,7 @@ public class SpelTemplateEngineTest {
         engine.getValue("{#request.params.remove('test')}", String.class);
     }
 
-    @Test(expected = SpelEvaluationException.class)
+    @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowToAddHeader() {
 
         when(request.headers()).thenReturn(new HttpHeaders());
@@ -389,7 +381,7 @@ public class SpelTemplateEngineTest {
         engine.getValue("{#request.headers.add('X-Gravitee-Endpoint', 'test')}", String.class);
     }
 
-    @Test(expected = SpelEvaluationException.class)
+    @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowToRemoveHeader() {
 
         when(request.headers()).thenReturn(new HttpHeaders());
@@ -423,20 +415,20 @@ public class SpelTemplateEngineTest {
                 .withProperty(EL_WHITELIST_MODE_KEY, "append")
                 .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "method java.lang.System getenv");
 
-        SecuredMethodResolver.initialize(environment);
+        SecuredResolver.initialize(environment);
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         assertEquals(System.getenv(), engine.getValue("{(T(java.lang.System)).getenv()}", Map.class));
     }
 
-    @Test(expected = SpelEvaluationException.class)
+    @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowMethodWhenBuiltInWhitelistNotLoaded() {
 
         ConfigurableEnvironment environment = new MockEnvironment()
                 .withProperty(EL_WHITELIST_MODE_KEY, "replace") // The configured whitelist replaces the built-in (doesn't contains Math.abs(int) method).
                 .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "method java.lang.System getenv");
 
-        SecuredMethodResolver.initialize(environment);
+        SecuredResolver.initialize(environment);
 
         String expression = "{T(java.lang.Math).abs(60)}";
         TemplateEngine engine = TemplateEngine.templateEngine();
@@ -445,18 +437,62 @@ public class SpelTemplateEngineTest {
     }
 
     @Test
-    public void shouldIgnoreUnkownWhitelistedClassesOrMethods() {
+    public void shouldIgnoreUnknownWhitelistedClassesOrMethods() {
 
         ConfigurableEnvironment environment = new MockEnvironment()
                 .withProperty(EL_WHITELIST_MODE_KEY, "append")
                 .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "class io.gravitee.Unknown")
                 .withProperty(EL_WHITELIST_LIST_KEY + "[1]", "method java.lang.Math unknown");
 
-        SecuredMethodResolver.initialize(environment);
+        SecuredResolver.initialize(environment);
 
         String expression = "{T(java.lang.Math).abs(60)}";
         TemplateEngine engine = TemplateEngine.templateEngine();
 
         assertEquals((Integer) 60, engine.getValue(expression, Integer.class));
+    }
+
+    @Test
+    public void shouldAllowConstructorsFromWhitelistedClasses() {
+        String expression = "{(new java.lang.String(\"Gravitee\"))}";
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        assertEquals("Gravitee", engine.getValue(expression, String.class));
+    }
+
+    @Test(expected = ExpressionEvaluationException.class)
+    public void shouldNotAllowConstructorsFromUnknownClasses() {
+        String expression = "{(new java.lang.Thread())}";
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        engine.getValue(expression, String.class);
+    }
+
+    @Test
+    public void shouldAllowConstructorsFromWhitelistedConstructors() {
+        ConfigurableEnvironment environment = new MockEnvironment()
+                .withProperty(EL_WHITELIST_MODE_KEY, "append")
+                .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "new java.lang.Exception java.lang.String")
+                ;
+
+        SecuredResolver.initialize(environment);
+        String expression = "{(new java.lang.Exception(\"Gravitee\"))}";
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        assertEquals(new Exception("Gravitee").getMessage(), engine.getValue(expression, Exception.class).getMessage());
+    }
+
+    @Test(expected = ExpressionEvaluationException.class)
+    public void shouldIgnoreConstructorsOthersThanWhitelisted() {
+        ConfigurableEnvironment environment = new MockEnvironment()
+                .withProperty(EL_WHITELIST_MODE_KEY, "append")
+                .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "new java.lang.Exception java.lang.String")
+                ;
+
+        SecuredResolver.initialize(environment);
+        String expression = "{(new java.lang.Exception())}";
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        engine.getValue(expression, Exception.class) ;
     }
 }
