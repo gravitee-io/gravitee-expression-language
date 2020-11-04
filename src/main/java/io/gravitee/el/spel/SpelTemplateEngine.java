@@ -17,10 +17,12 @@ package io.gravitee.el.spel;
 
 import io.gravitee.el.TemplateContext;
 import io.gravitee.el.TemplateEngine;
+import io.gravitee.el.exceptions.ExpressionEvaluationException;
 import io.gravitee.el.spel.context.SpelTemplateContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.spel.SpelCompilerMode;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
@@ -53,7 +55,11 @@ public class SpelTemplateEngine implements TemplateEngine {
     }
 
     private <T> T getValue(Expression expression, Class<T> clazz) {
-        return expression.getValue(templateContext.getContext(), clazz);
+        try {
+            return expression.getValue(templateContext.getContext(), clazz);
+        } catch (SpelEvaluationException spelEvaluationException) {
+            throw new ExpressionEvaluationException(expression.getExpressionString(), spelEvaluationException) ;
+        }
     }
 
     @Override

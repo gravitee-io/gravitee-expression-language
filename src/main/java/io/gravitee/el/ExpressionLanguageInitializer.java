@@ -16,6 +16,7 @@
 package io.gravitee.el;
 
 import io.gravitee.el.spel.context.SecuredMethodResolver;
+import io.gravitee.el.spel.context.SecuredResolver;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -35,6 +36,6 @@ public class ExpressionLanguageInitializer implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        SecuredMethodResolver.initialize(environment);
+        SecuredResolver.initialize(environment);
     }
 }

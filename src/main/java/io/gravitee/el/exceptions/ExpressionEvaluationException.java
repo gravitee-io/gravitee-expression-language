@@ -24,4 +24,8 @@ public class ExpressionEvaluationException extends RuntimeException {
     public ExpressionEvaluationException(String expression) {
         super("The template evaluation returns an error. Expression:\n" + expression);
     }
+
+    public ExpressionEvaluationException(String expression, Throwable cause) {
+        super("The template evaluation returns an error. Expression:\n" + expression, cause);
+    }
 }

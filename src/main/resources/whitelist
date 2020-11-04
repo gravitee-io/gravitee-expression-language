@@ -12,6 +12,14 @@ class java.time.LocalDate
 class java.time.LocalDateTime
 class java.time.ZonedDateTime
 class java.time.format.DateTimeFormatter
+class java.text.Format
+class java.text.DateFormat
+class java.text.SimpleDateFormat
+class java.text.NumberFormat
+class java.text.ChoiceFormat
+class java.text.DecimalFormat
+class java.text.MessageFormat
+
 class java.util.Calendar
 
 # Allows by method signatures
@@ -63,3 +71,5 @@ method java.util.Random nextInt int
 method java.util.Random nextLong
 method java.util.TimeZone getTimeZone java.lang.String
 method java.util.UUID randomUUID
+
+# Allows by constructor signatures
