@@ -35,7 +35,7 @@ public class SecuredMethodResolver extends ReflectiveMethodResolver {
     public static SecuredResolver securedResolver = SecuredResolver.getInstance();
 
     @Override
-    protected Method[] getMethods(Class<?> type) {
+    public Method[] getMethods(Class<?> type) {
         return securedResolver.getMethods(type) ;
     }
 
