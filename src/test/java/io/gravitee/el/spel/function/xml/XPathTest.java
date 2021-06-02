@@ -13,32 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.el.spel;
+package io.gravitee.el.spel.function.xml;
 
-import io.gravitee.el.spel.function.json.JsonPathFunction;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class JsonPathTest {
+public class XPathTest {
 
     @Test
-    public void shouldNotGetValueFromCache() throws IOException {
-        Map<String, String> context1 = new HashMap<>();
-        context1.put("key", "first");
-        Object value = JsonPathFunction.evaluate(context1, "concat(\"/\", $.key)");
-        Assert.assertEquals("/first", value);
+    public void shouldExtractValue_xPath() {
+        final String input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+        "<root>" +
+        "<lastname>DOE</lastname>" +
+        "<firstname>JOHN</firstname>" +
+        "<age>35</age>" +
+        "</root>";
 
-        Map<String, String> context2 = new HashMap<>();
-        context2.put("key", "second");
-        value = JsonPathFunction.evaluate(context2, "concat(\"/\", $.key)");
-        Assert.assertEquals("/second", value);
+        Object lastname = XPathFunction.evaluate(input, ".//lastname");
+        Assert.assertEquals("DOE", lastname);
     }
 }
