@@ -16,10 +16,10 @@
 package io.gravitee.el.spel.context;
 
 import io.gravitee.el.TemplateContext;
-import io.gravitee.el.spel.function.JsonPathFunction;
+import io.gravitee.el.spel.function.json.JsonPathFunction;
+import io.gravitee.el.spel.function.xml.XPathFunction;
 import org.springframework.beans.BeanUtils;
 import org.springframework.expression.EvaluationContext;
-import org.springframework.integration.xml.xpath.XPathUtils;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -36,7 +36,7 @@ public class SpelTemplateContext implements TemplateContext {
         context.setVariable("jsonPath",
                 BeanUtils.resolveSignature("evaluate", JsonPathFunction.class));
         context.setVariable("xpath",
-                BeanUtils.resolveSignature("evaluate", XPathUtils.class));
+                BeanUtils.resolveSignature("evaluate", XPathFunction.class));
     }
 
     @Override
