@@ -16,12 +16,13 @@
 package io.gravitee.el.spel;
 
 import io.gravitee.el.spel.function.json.JsonPathFunction;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Assert;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.Test;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)

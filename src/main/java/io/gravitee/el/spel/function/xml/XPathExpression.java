@@ -15,20 +15,20 @@
  */
 package io.gravitee.el.spel.function.xml;
 
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
-import java.util.ArrayList;
-import java.util.List;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
 public class XPathExpression {
+
     private final javax.xml.xpath.XPathExpression xpathExpression;
     private final String expression;
 
@@ -42,17 +42,17 @@ public class XPathExpression {
     }
 
     public String evaluateAsString(Node node) {
-        return (String)this.evaluate(node, XPathConstants.STRING);
+        return (String) this.evaluate(node, XPathConstants.STRING);
     }
 
     public List<Node> evaluateAsNodeList(Node node) {
-        NodeList nodeList = (NodeList)this.evaluate(node, XPathConstants.NODESET);
+        NodeList nodeList = (NodeList) this.evaluate(node, XPathConstants.NODESET);
         return this.toNodeList(nodeList);
     }
 
     private Object evaluate(Node node, QName returnType) {
         try {
-            synchronized(this.xpathExpression) {
+            synchronized (this.xpathExpression) {
                 return this.xpathExpression.evaluate(node, returnType);
             }
         } catch (XPathExpressionException var6) {
@@ -63,7 +63,7 @@ public class XPathExpression {
     private List<Node> toNodeList(NodeList nodeList) {
         List<Node> result = new ArrayList<>(nodeList.getLength());
 
-        for(int i = 0; i < nodeList.getLength(); ++i) {
+        for (int i = 0; i < nodeList.getLength(); ++i) {
             result.add(nodeList.item(i));
         }
 
@@ -71,14 +71,14 @@ public class XPathExpression {
     }
 
     public double evaluateAsNumber(Node node) {
-        return (Double)this.evaluate(node, XPathConstants.NUMBER);
+        return (Double) this.evaluate(node, XPathConstants.NUMBER);
     }
 
     public boolean evaluateAsBoolean(Node node) {
-        return (Boolean)this.evaluate(node, XPathConstants.BOOLEAN);
+        return (Boolean) this.evaluate(node, XPathConstants.BOOLEAN);
     }
 
     public Node evaluateAsNode(Node node) {
-        return (Node)this.evaluate(node, XPathConstants.NODE);
+        return (Node) this.evaluate(node, XPathConstants.NODE);
     }
 }

@@ -22,7 +22,6 @@ import io.gravitee.common.util.ServiceLoaderHelper;
  * @author GraviteeSource Team
  */
 public interface TemplateEngine {
-
     static TemplateEngine templateEngine() {
         return factory.templateEngine();
     }
@@ -37,5 +36,4 @@ public interface TemplateEngine {
     TemplateContext getTemplateContext();
 
     TemplateEngineFactory factory = ServiceLoaderHelper.loadFactory(TemplateEngineFactory.class);
-
 }

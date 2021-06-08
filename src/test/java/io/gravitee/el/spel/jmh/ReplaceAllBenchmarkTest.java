@@ -15,16 +15,15 @@
  */
 package io.gravitee.el.spel.jmh;
 
+import static org.junit.Assert.assertFalse;
+
+import java.util.Collection;
 import org.junit.Test;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-
-import java.util.Collection;
-
-import static org.junit.Assert.assertFalse;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)

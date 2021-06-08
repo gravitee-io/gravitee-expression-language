@@ -26,12 +26,13 @@ public class XPathTest {
 
     @Test
     public void shouldExtractValue_xPath() {
-        final String input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-        "<root>" +
-        "<lastname>DOE</lastname>" +
-        "<firstname>JOHN</firstname>" +
-        "<age>35</age>" +
-        "</root>";
+        final String input =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+            "<root>" +
+            "<lastname>DOE</lastname>" +
+            "<firstname>JOHN</firstname>" +
+            "<age>35</age>" +
+            "</root>";
 
         Object lastname = XPathFunction.evaluate(input, ".//lastname");
         Assert.assertEquals("DOE", lastname);

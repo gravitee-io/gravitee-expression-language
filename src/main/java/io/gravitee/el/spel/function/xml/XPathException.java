@@ -21,8 +21,7 @@ package io.gravitee.el.spel.function.xml;
  */
 public class XPathException extends RuntimeException {
 
-    public XPathException() {
-    }
+    public XPathException() {}
 
     public XPathException(String message) {
         super(message);

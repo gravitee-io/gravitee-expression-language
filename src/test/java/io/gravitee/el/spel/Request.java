@@ -19,7 +19,6 @@ import io.gravitee.common.http.HttpHeaders;
 import io.gravitee.common.http.HttpMethod;
 import io.gravitee.common.http.HttpVersion;
 import io.gravitee.common.util.MultiValueMap;
-
 import java.time.Instant;
 
 /**
@@ -29,7 +28,6 @@ import java.time.Instant;
  * @author GraviteeSource Team
  */
 public interface Request {
-
     String id();
 
     /**
@@ -109,5 +107,4 @@ public interface Request {
      * @return a <code>String</code> containing the IP address on which the request was received.
      */
     String localAddress();
-
 }

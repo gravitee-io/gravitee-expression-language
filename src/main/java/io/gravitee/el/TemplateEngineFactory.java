@@ -19,6 +19,5 @@ package io.gravitee.el;
  * @author Christophe LANNOY (chrislannoy.java at gmail.com)
  */
 public interface TemplateEngineFactory {
-
     TemplateEngine templateEngine();
 }

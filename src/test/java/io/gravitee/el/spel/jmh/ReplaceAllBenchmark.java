@@ -15,10 +15,9 @@
  */
 package io.gravitee.el.spel.jmh;
 
-import org.openjdk.jmh.annotations.*;
-
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import org.openjdk.jmh.annotations.*;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)

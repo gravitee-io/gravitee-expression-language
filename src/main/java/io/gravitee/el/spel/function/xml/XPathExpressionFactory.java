@@ -15,12 +15,11 @@
  */
 package io.gravitee.el.spel.function.xml;
 
-import org.springframework.util.xml.SimpleNamespaceContext;
-
+import java.util.Map;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.util.Map;
+import org.springframework.util.xml.SimpleNamespaceContext;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)

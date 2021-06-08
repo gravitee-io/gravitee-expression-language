@@ -20,7 +20,6 @@ package io.gravitee.el;
  * @author GraviteeSource Team
  */
 public interface TemplateContext {
-
     /**
      * Set a named variable within this evaluation context to a specified value.
      * @param name variable to set

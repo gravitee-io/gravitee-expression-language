@@ -15,6 +15,12 @@
  */
 package io.gravitee.el.spel.context;
 
+import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_LIST_KEY;
+import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_MODE_KEY;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import io.gravitee.common.http.HttpHeaders;
 import io.gravitee.common.util.LinkedMultiValueMap;
 import io.gravitee.common.util.MultiValueMap;
@@ -22,6 +28,7 @@ import io.gravitee.el.TemplateEngine;
 import io.gravitee.el.exceptions.ExpressionEvaluationException;
 import io.gravitee.el.spel.EvaluableRequest;
 import io.gravitee.el.spel.Request;
+import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,14 +41,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.util.StringUtils;
-
-import java.util.*;
-
-import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_LIST_KEY;
-import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_MODE_KEY;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -61,11 +60,13 @@ public class SpelTemplateEngineTest {
     @Test
     public void shouldTransformWithRequestHeader() {
         final HttpHeaders headers = new HttpHeaders();
-        headers.setAll(new HashMap<String, String>() {
-            {
-                put("X-Gravitee-Endpoint", "my_api_host");
+        headers.setAll(
+            new HashMap<String, String>() {
+                {
+                    put("X-Gravitee-Endpoint", "my_api_host");
+                }
             }
-        });
+        );
 
         when(request.headers()).thenReturn(headers);
         when(request.path()).thenReturn("/stores/99/products/123456");
@@ -80,11 +81,13 @@ public class SpelTemplateEngineTest {
     @Test
     public void shouldTransformWithRequestHeader_getValue() {
         final HttpHeaders headers = new HttpHeaders();
-        headers.setAll(new HashMap<String, String>() {
-            {
-                put("X-Gravitee-Endpoint", "my_api_host");
+        headers.setAll(
+            new HashMap<String, String>() {
+                {
+                    put("X-Gravitee-Endpoint", "my_api_host");
+                }
             }
-        });
+        );
 
         when(request.headers()).thenReturn(headers);
         when(request.path()).thenReturn("/stores/99/products/123456");
@@ -165,11 +168,13 @@ public class SpelTemplateEngineTest {
     @Test
     public void shouldTransformWithProperties() {
         final HttpHeaders headers = new HttpHeaders();
-        headers.setAll(new HashMap<String, String>() {
-            {
-                put("X-Gravitee-Endpoint", "my_api_host");
+        headers.setAll(
+            new HashMap<String, String>() {
+                {
+                    put("X-Gravitee-Endpoint", "my_api_host");
+                }
             }
-        });
+        );
 
         when(request.headers()).thenReturn(headers);
         when(request.path()).thenReturn("/stores/123");
@@ -182,18 +187,22 @@ public class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
         engine.getTemplateContext().setVariable("properties", properties);
 
-        String value = engine.convert("<user><id>{#request.paths[2]}</id><name>{#properties['name_123']}</name><firstname>{#properties['firstname_' + #request.paths[2]]}</firstname></user>");
+        String value = engine.convert(
+            "<user><id>{#request.paths[2]}</id><name>{#properties['name_123']}</name><firstname>{#properties['firstname_' + #request.paths[2]]}</firstname></user>"
+        );
         assertNotNull(value);
     }
 
     @Test
     public void shouldTransformJsonContent() {
         final HttpHeaders headers = new HttpHeaders();
-        headers.setAll(new HashMap<String, String>() {
-            {
-                put("X-Gravitee-Endpoint", "my_api_host");
+        headers.setAll(
+            new HashMap<String, String>() {
+                {
+                    put("X-Gravitee-Endpoint", "my_api_host");
+                }
             }
-        });
+        );
 
         when(request.headers()).thenReturn(headers);
         when(request.path()).thenReturn("/stores/123");
@@ -222,12 +231,15 @@ public class SpelTemplateEngineTest {
     @Test
     public void shouldXpathFunction() {
         EvaluableRequest req = Mockito.mock(EvaluableRequest.class);
-        when(req.getContent()).thenReturn("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+        when(req.getContent())
+            .thenReturn(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                 "<root>" +
                 "<lastname>DOE</lastname>" +
                 "<firstname>JOHN</firstname>" +
                 "<age>35</age>" +
-                "</root>");
+                "</root>"
+            );
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", req);
@@ -286,7 +298,6 @@ public class SpelTemplateEngineTest {
 
     @Test
     public void shouldJsonPathFunctionForBoolean() {
-
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("profile", "{ \"lastname\": \"DOE\", \"firstname\": \"JOHN\", \"age\": 35 }");
 
@@ -305,13 +316,17 @@ public class SpelTemplateEngineTest {
 
     @Test
     public void shouldJsonPathFunctionGroupsForBoolean() {
-
         TemplateEngine engine = TemplateEngine.templateEngine();
-        engine.getTemplateContext().setVariable("profile", "{ \"lastname\": \"DOE\", \"firstname\": \"JOHN\", \"age\": 35"
-                + ", \"groups\" : [\"Group1\", \"Group2\", \"Group3\"]"
-                + ", \"emptiness\" : []"
-                + ", \"nothingness\" : null"
-                + " }");
+        engine
+            .getTemplateContext()
+            .setVariable(
+                "profile",
+                "{ \"lastname\": \"DOE\", \"firstname\": \"JOHN\", \"age\": 35" +
+                ", \"groups\" : [\"Group1\", \"Group2\", \"Group3\"]" +
+                ", \"emptiness\" : []" +
+                ", \"nothingness\" : null" +
+                " }"
+            );
 
         String content = "{#jsonPath(#profile, '$.groups').contains('Group2')}";
         boolean result = engine.getValue(content, boolean.class);
@@ -332,7 +347,6 @@ public class SpelTemplateEngineTest {
 
     @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowedClassMethod() {
-
         String expression = "{T(java.lang.Class).forName('java.lang.Math')}";
         TemplateEngine engine = TemplateEngine.templateEngine();
 
@@ -341,7 +355,6 @@ public class SpelTemplateEngineTest {
 
     @Test
     public void shouldAllowMathMethod() {
-
         String expression = "{T(java.lang.Math).abs(60)}";
         TemplateEngine engine = TemplateEngine.templateEngine();
 
@@ -350,7 +363,6 @@ public class SpelTemplateEngineTest {
 
     @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowAddParam() {
-
         when(request.parameters()).thenReturn(new LinkedMultiValueMap<>());
 
         TemplateEngine engine = TemplateEngine.templateEngine();
@@ -361,7 +373,6 @@ public class SpelTemplateEngineTest {
 
     @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowRemoveParam() {
-
         when(request.parameters()).thenReturn(new LinkedMultiValueMap<>());
 
         TemplateEngine engine = TemplateEngine.templateEngine();
@@ -372,7 +383,6 @@ public class SpelTemplateEngineTest {
 
     @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowToAddHeader() {
-
         when(request.headers()).thenReturn(new HttpHeaders());
 
         TemplateEngine engine = TemplateEngine.templateEngine();
@@ -383,7 +393,6 @@ public class SpelTemplateEngineTest {
 
     @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowToRemoveHeader() {
-
         when(request.headers()).thenReturn(new HttpHeaders());
 
         TemplateEngine engine = TemplateEngine.templateEngine();
@@ -394,7 +403,6 @@ public class SpelTemplateEngineTest {
 
     @Test
     public void shouldAllowMethodFromSuperType() {
-
         ArrayList<String> list = new ArrayList<>();
         list.add("test");
 
@@ -410,10 +418,9 @@ public class SpelTemplateEngineTest {
 
     @Test
     public void shouldAllowMethodFromConfiguration() {
-
         ConfigurableEnvironment environment = new MockEnvironment()
-                .withProperty(EL_WHITELIST_MODE_KEY, "append")
-                .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "method java.lang.System getenv");
+            .withProperty(EL_WHITELIST_MODE_KEY, "append")
+            .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "method java.lang.System getenv");
 
         SecuredResolver.initialize(environment);
 
@@ -423,10 +430,9 @@ public class SpelTemplateEngineTest {
 
     @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowMethodWhenBuiltInWhitelistNotLoaded() {
-
         ConfigurableEnvironment environment = new MockEnvironment()
-                .withProperty(EL_WHITELIST_MODE_KEY, "replace") // The configured whitelist replaces the built-in (doesn't contains Math.abs(int) method).
-                .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "method java.lang.System getenv");
+            .withProperty(EL_WHITELIST_MODE_KEY, "replace") // The configured whitelist replaces the built-in (doesn't contains Math.abs(int) method).
+            .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "method java.lang.System getenv");
 
         SecuredResolver.initialize(environment);
 
@@ -438,11 +444,10 @@ public class SpelTemplateEngineTest {
 
     @Test
     public void shouldIgnoreUnknownWhitelistedClassesOrMethods() {
-
         ConfigurableEnvironment environment = new MockEnvironment()
-                .withProperty(EL_WHITELIST_MODE_KEY, "append")
-                .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "class io.gravitee.Unknown")
-                .withProperty(EL_WHITELIST_LIST_KEY + "[1]", "method java.lang.Math unknown");
+            .withProperty(EL_WHITELIST_MODE_KEY, "append")
+            .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "class io.gravitee.Unknown")
+            .withProperty(EL_WHITELIST_LIST_KEY + "[1]", "method java.lang.Math unknown");
 
         SecuredResolver.initialize(environment);
 
@@ -471,9 +476,8 @@ public class SpelTemplateEngineTest {
     @Test
     public void shouldAllowConstructorsFromWhitelistedConstructors() {
         ConfigurableEnvironment environment = new MockEnvironment()
-                .withProperty(EL_WHITELIST_MODE_KEY, "append")
-                .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "new java.lang.Exception java.lang.String")
-                ;
+            .withProperty(EL_WHITELIST_MODE_KEY, "append")
+            .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "new java.lang.Exception java.lang.String");
 
         SecuredResolver.initialize(environment);
         String expression = "{(new java.lang.Exception(\"Gravitee\"))}";
@@ -485,14 +489,13 @@ public class SpelTemplateEngineTest {
     @Test(expected = ExpressionEvaluationException.class)
     public void shouldIgnoreConstructorsOthersThanWhitelisted() {
         ConfigurableEnvironment environment = new MockEnvironment()
-                .withProperty(EL_WHITELIST_MODE_KEY, "append")
-                .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "new java.lang.Exception java.lang.String")
-                ;
+            .withProperty(EL_WHITELIST_MODE_KEY, "append")
+            .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "new java.lang.Exception java.lang.String");
 
         SecuredResolver.initialize(environment);
         String expression = "{(new java.lang.Exception())}";
         TemplateEngine engine = TemplateEngine.templateEngine();
 
-        engine.getValue(expression, Exception.class) ;
+        engine.getValue(expression, Exception.class);
     }
 }
