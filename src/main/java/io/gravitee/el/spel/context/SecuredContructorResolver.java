@@ -15,14 +15,13 @@
  */
 package io.gravitee.el.spel.context;
 
+import java.util.List;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.ReflectiveConstructorExecutor;
 import org.springframework.expression.spel.support.ReflectiveConstructorResolver;
-
-import java.util.List;
 
 /**
  *
@@ -31,17 +30,20 @@ import java.util.List;
  */
 public class SecuredContructorResolver extends ReflectiveConstructorResolver {
 
-
     private static SecuredResolver securedResolver = SecuredResolver.getInstance();
 
     @Override
-    public ConstructorExecutor resolve(EvaluationContext context, String typeName, List<TypeDescriptor> argumentTypes) throws AccessException {
-        ReflectiveConstructorExecutor reflectiveConstructorExecutor = (ReflectiveConstructorExecutor) super.resolve(context, typeName, argumentTypes);
+    public ConstructorExecutor resolve(EvaluationContext context, String typeName, List<TypeDescriptor> argumentTypes)
+        throws AccessException {
+        ReflectiveConstructorExecutor reflectiveConstructorExecutor = (ReflectiveConstructorExecutor) super.resolve(
+            context,
+            typeName,
+            argumentTypes
+        );
 
         if (securedResolver.isConstructorAllowed(reflectiveConstructorExecutor.getConstructor())) {
             return reflectiveConstructorExecutor;
         }
-        throw new AccessException("Failed to resolve constructor") ;
+        throw new AccessException("Failed to resolve constructor");
     }
-
 }

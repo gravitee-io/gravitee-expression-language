@@ -15,20 +15,19 @@
  */
 package io.gravitee.el.spel.function.xml;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.StringReader;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -51,32 +50,24 @@ public class XmlPayloadConverter {
         try {
             if (object instanceof Document) {
                 return (Document) object;
-            }
-            else if (object instanceof Node) {
+            } else if (object instanceof Node) {
                 return nodeToDocument((Node) object);
-            }
-            else if (object instanceof DOMSource) {
+            } else if (object instanceof DOMSource) {
                 Node node = ((DOMSource) object).getNode();
                 return nodeToDocument(node);
-            }
-            else if (object instanceof Source) {
+            } else if (object instanceof Source) {
                 InputSource inputSource = sourceToInputSource((Source) object);
                 return getDocumentBuilder().parse(inputSource);
-            }
-            else if (object instanceof File) {
+            } else if (object instanceof File) {
                 return getDocumentBuilder().parse((File) object);
-            }
-            else if (object instanceof String) {
+            } else if (object instanceof String) {
                 return getDocumentBuilder().parse(new InputSource(new StringReader((String) object)));
-            }
-            else if (object instanceof InputStream) {
+            } else if (object instanceof InputStream) {
                 return getDocumentBuilder().parse((InputStream) object);
-            }
-            else if (object instanceof byte[]) {
+            } else if (object instanceof byte[]) {
                 return getDocumentBuilder().parse(new ByteArrayInputStream((byte[]) object));
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new XPathException("failed to parse " + object.getClass() + " payload '" + object + "'", e);
         }
 
@@ -104,11 +95,9 @@ public class XmlPayloadConverter {
         Node node;
         if (object instanceof Node) {
             node = (Node) object;
-        }
-        else if (object instanceof DOMSource) {
+        } else if (object instanceof DOMSource) {
             node = ((DOMSource) object).getNode();
-        }
-        else {
+        } else {
             node = convertToDocument(object);
         }
         return node;
@@ -117,8 +106,7 @@ public class XmlPayloadConverter {
     protected synchronized DocumentBuilder getDocumentBuilder() {
         try {
             return this.documentBuilderFactory.newDocumentBuilder();
-        }
-        catch (ParserConfigurationException e) {
+        } catch (ParserConfigurationException e) {
             throw new XPathException("failed to create a new DocumentBuilder", e);
         }
     }

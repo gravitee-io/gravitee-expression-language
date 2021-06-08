@@ -17,12 +17,11 @@ package io.gravitee.el;
 
 import io.gravitee.el.spel.context.SecuredMethodResolver;
 import io.gravitee.el.spel.context.SecuredResolver;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
 
 /**
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
@@ -35,7 +34,6 @@ public class ExpressionLanguageInitializer implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-
         SecuredResolver.initialize(environment);
     }
 }

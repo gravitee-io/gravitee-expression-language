@@ -15,11 +15,10 @@
  */
 package io.gravitee.el.spel.context;
 
+import java.lang.reflect.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.support.ReflectiveMethodResolver;
-
-import java.lang.reflect.Method;
 
 /**
  *
@@ -36,7 +35,6 @@ public class SecuredMethodResolver extends ReflectiveMethodResolver {
 
     @Override
     public Method[] getMethods(Class<?> type) {
-        return securedResolver.getMethods(type) ;
+        return securedResolver.getMethods(type);
     }
-
 }

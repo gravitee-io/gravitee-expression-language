@@ -30,13 +30,10 @@ public class SpelTemplateContext implements TemplateContext {
     private final EvaluationContext context;
 
     public SpelTemplateContext() {
-
         context = new SecuredEvaluationContext();
 
-        context.setVariable("jsonPath",
-                BeanUtils.resolveSignature("evaluate", JsonPathFunction.class));
-        context.setVariable("xpath",
-                BeanUtils.resolveSignature("evaluate", XPathFunction.class));
+        context.setVariable("jsonPath", BeanUtils.resolveSignature("evaluate", JsonPathFunction.class));
+        context.setVariable("xpath", BeanUtils.resolveSignature("evaluate", XPathFunction.class));
     }
 
     @Override

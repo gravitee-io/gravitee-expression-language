@@ -20,6 +20,5 @@ package io.gravitee.el;
  * @author GraviteeSource Team
  */
 public interface TemplateVariableProvider {
-
     void provide(TemplateContext context);
 }

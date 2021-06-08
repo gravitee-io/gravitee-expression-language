@@ -15,17 +15,16 @@
  */
 package io.gravitee.el.spel.function.xml;
 
-import org.springframework.util.Assert;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.springframework.util.Assert;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -45,8 +44,7 @@ public final class XPathFunction {
 
     public static final String DOCUMENT_LIST = "document_list";
 
-    private static final List<String> RESULT_TYPES =
-            Arrays.asList(STRING, BOOLEAN, NUMBER, NODE, NODE_LIST, DOCUMENT_LIST);
+    private static final List<String> RESULT_TYPES = Arrays.asList(STRING, BOOLEAN, NUMBER, NODE, NODE_LIST, DOCUMENT_LIST);
 
     private static final XmlPayloadConverter CONVERTER = new XmlPayloadConverter();
 
@@ -56,8 +54,7 @@ public final class XPathFunction {
         DOCUMENT_BUILDER_FACTORY.setNamespaceAware(true);
     }
 
-    private XPathFunction() {
-    }
+    private XPathFunction() {}
 
     public static <T> T evaluate(Object object, String xpath, Object... resultArg) {
         Object resultType = null;
@@ -75,8 +72,7 @@ public final class XPathFunction {
         } else if (resultType instanceof String && RESULT_TYPES.contains(resultType)) {
             String resType = (String) resultType;
             if (DOCUMENT_LIST.equals(resType)) {
-                List<Node> nodeList = (List<Node>) XPathEvaluationType.NODE_LIST_RESULT.evaluateXPath(expression,
-                        node);
+                List<Node> nodeList = (List<Node>) XPathEvaluationType.NODE_LIST_RESULT.evaluateXPath(expression, node);
                 try {
                     DocumentBuilder documentBuilder = DOCUMENT_BUILDER_FACTORY.newDocumentBuilder();
                     List<Node> documents = new ArrayList<>(nodeList.size());
@@ -86,19 +82,17 @@ public final class XPathFunction {
                         documents.add(document);
                     }
                     return (T) documents;
-                }
-                catch (ParserConfigurationException e) {
+                } catch (ParserConfigurationException e) {
                     throw new XPathException("Unable to create 'documentBuilder'.", e);
                 }
-            }
-            else {
+            } else {
                 XPathEvaluationType evaluationType = XPathEvaluationType.valueOf(resType.toUpperCase() + "_RESULT");
                 return (T) evaluationType.evaluateXPath(expression, node);
             }
-        }
-        else {
-            throw new IllegalArgumentException("'resultArg[0]' can be an instance of 'NodeMapper<?>' " +
-                    "or one of supported String constants: " + RESULT_TYPES);
+        } else {
+            throw new IllegalArgumentException(
+                "'resultArg[0]' can be an instance of 'NodeMapper<?>' " + "or one of supported String constants: " + RESULT_TYPES
+            );
         }
     }
 }

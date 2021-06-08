@@ -17,14 +17,6 @@ package io.gravitee.el.spel.context;
 
 import io.gravitee.common.util.EnvironmentUtils;
 import io.gravitee.el.spel.SpelTemplateEngine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.Environment;
-import org.springframework.expression.spel.support.ReflectiveMethodResolver;
-import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +27,13 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
+import org.springframework.expression.spel.support.ReflectiveMethodResolver;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 
 /**
  * The {@link SecuredResolver} is a thread-safe singleton class which can be used to replace the default {@link ReflectiveMethodResolver} used by the {@link org.springframework.expression.spel.support.StandardEvaluationContext}.
@@ -59,9 +58,9 @@ public class SecuredResolver {
     static final String WHITELIST_CONSTRUCTOR_PREFIX = "new ";
 
     private static SecuredResolver INSTANCE;
-    private final static Map<Class<?>, Method[]> methodsByType = new ConcurrentHashMap<>();
-    private final static Map<Class<?>, Method[]> methodsByTypeAndSuperTypes = new ConcurrentHashMap<>();
-    private final static Set<Constructor> allConstructors = ConcurrentHashMap.newKeySet() ;
+    private static final Map<Class<?>, Method[]> methodsByType = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Method[]> methodsByTypeAndSuperTypes = new ConcurrentHashMap<>();
+    private static final Set<Constructor> allConstructors = ConcurrentHashMap.newKeySet();
 
     /**
      * Initialize the method resolver loading all whitelisted methods from environment configuration and / or built-in whitelist.
@@ -70,7 +69,6 @@ public class SecuredResolver {
      * @param environment an optional environment, if <code>null</code>, only built-in whitelist will be initialized.
      */
     public static void initialize(@Nullable Environment environment) {
-
         loadWhitelistMethods(environment);
 
         // Force instance creation if not already done.
@@ -78,7 +76,6 @@ public class SecuredResolver {
     }
 
     static SecuredResolver getInstance() {
-
         if (INSTANCE == null) {
             INSTANCE = new SecuredResolver();
         }
@@ -86,11 +83,9 @@ public class SecuredResolver {
         return INSTANCE;
     }
 
-    private SecuredResolver() {
-    }
+    private SecuredResolver() {}
 
     protected Method[] getMethods(Class<?> type) {
-
         if (methodsByTypeAndSuperTypes.containsKey(type)) {
             return methodsByTypeAndSuperTypes.get(type);
         }
@@ -111,11 +106,10 @@ public class SecuredResolver {
     }
 
     protected boolean isConstructorAllowed(Constructor<?> constructor) {
-        return allConstructors.contains(constructor) ;
+        return allConstructors.contains(constructor);
     }
 
     private static void loadWhitelistMethods(Environment environment) {
-
         List<Method> methods = new ArrayList<>();
         List<Constructor<?>> constructors = new ArrayList<>();
         boolean loadBuiltInWhitelist = true;
@@ -125,7 +119,9 @@ public class SecuredResolver {
             // Built-in whitelist will not be loaded if mode is not 'append' (ie: set to 'replace').
             loadBuiltInWhitelist = WHITELIST_MODE.equals(environment.getProperty(EL_WHITELIST_MODE_KEY, WHITELIST_MODE));
 
-            Collection<Object> configWhitelist = EnvironmentUtils.getPropertiesStartingWith((ConfigurableEnvironment) environment, EL_WHITELIST_LIST_KEY).values();
+            Collection<Object> configWhitelist = EnvironmentUtils
+                .getPropertiesStartingWith((ConfigurableEnvironment) environment, EL_WHITELIST_LIST_KEY)
+                .values();
 
             for (Object declaration : configWhitelist) {
                 parseDeclaration(String.valueOf(declaration), methods, constructors);
@@ -149,19 +145,20 @@ public class SecuredResolver {
         }
 
         methodsByType.clear();
-        methodsByType.putAll(methods.stream()
+        methodsByType.putAll(
+            methods
+                .stream()
                 .collect(Collectors.groupingBy(Method::getDeclaringClass))
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().toArray(EMPTY))));
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().toArray(EMPTY)))
+        );
 
         methodsByTypeAndSuperTypes.clear();
-        allConstructors.addAll(constructors) ;
-
+        allConstructors.addAll(constructors);
     }
 
     private static void parseDeclaration(String declaration, List<Method> methods, List<Constructor<?>> constructors) {
-
         try {
             if (declaration.startsWith(WHITELIST_METHOD_PREFIX)) {
                 methods.add(parseMethod(declaration));
@@ -177,7 +174,6 @@ public class SecuredResolver {
     }
 
     private static Method parseMethod(String declaration) throws Exception {
-
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         String methodName = split[2];
@@ -198,7 +194,6 @@ public class SecuredResolver {
     }
 
     private static List<Method> parseAllMethods(String declaration) throws Exception {
-
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         Class<?> clazz = ClassUtils.forName(clazzName, SpelTemplateContext.class.getClassLoader());
@@ -207,7 +202,6 @@ public class SecuredResolver {
     }
 
     private static Constructor parseConstructor(String declaration) throws Exception {
-
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         String[] methodArgs = {};
@@ -228,12 +222,10 @@ public class SecuredResolver {
     }
 
     private static List<Constructor<?>> parseAllConstructors(String declaration) throws Exception {
-
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
 
         return Arrays.asList(clazz.getDeclaredConstructors());
     }
-
 }

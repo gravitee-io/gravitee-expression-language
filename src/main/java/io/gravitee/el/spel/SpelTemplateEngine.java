@@ -19,14 +19,13 @@ import io.gravitee.el.TemplateContext;
 import io.gravitee.el.TemplateEngine;
 import io.gravitee.el.exceptions.ExpressionEvaluationException;
 import io.gravitee.el.spel.context.SpelTemplateContext;
+import java.util.regex.Pattern;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.spel.SpelCompilerMode;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-
-import java.util.regex.Pattern;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -38,7 +37,9 @@ public class SpelTemplateEngine implements TemplateEngine {
     private static final Pattern EXPRESSION_REGEX_PATTERN = Pattern.compile(EXPRESSION_REGEX);
     private static final String EXPRESSION_REGEX_SUBSTITUTE = "{'{'}$1";
     private static final ParserContext PARSER_CONTEXT = new TemplateParserContext();
-    private static final SpelExpressionParser EXPRESSION_PARSER = new SpelExpressionParser(new SpelParserConfiguration(SpelCompilerMode.MIXED, null));
+    private static final SpelExpressionParser EXPRESSION_PARSER = new SpelExpressionParser(
+        new SpelParserConfiguration(SpelCompilerMode.MIXED, null)
+    );
 
     private final SpelTemplateContext templateContext = new SpelTemplateContext();
 
@@ -48,17 +49,17 @@ public class SpelTemplateEngine implements TemplateEngine {
     }
 
     private Expression parseExpression(String expression) {
-
         return EXPRESSION_PARSER.parseExpression(
-                EXPRESSION_REGEX_PATTERN.matcher(expression).replaceAll(EXPRESSION_REGEX_SUBSTITUTE),
-                PARSER_CONTEXT);
+            EXPRESSION_REGEX_PATTERN.matcher(expression).replaceAll(EXPRESSION_REGEX_SUBSTITUTE),
+            PARSER_CONTEXT
+        );
     }
 
     private <T> T getValue(Expression expression, Class<T> clazz) {
         try {
             return expression.getValue(templateContext.getContext(), clazz);
         } catch (SpelEvaluationException spelEvaluationException) {
-            throw new ExpressionEvaluationException(expression.getExpressionString(), spelEvaluationException) ;
+            throw new ExpressionEvaluationException(expression.getExpressionString(), spelEvaluationException);
         }
     }
 

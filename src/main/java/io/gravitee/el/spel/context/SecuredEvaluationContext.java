@@ -15,13 +15,12 @@
  */
 package io.gravitee.el.spel.context;
 
-import org.springframework.expression.*;
-import org.springframework.expression.spel.support.*;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.expression.*;
+import org.springframework.expression.spel.support.*;
 
 /**
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
@@ -33,7 +32,9 @@ public class SecuredEvaluationContext implements EvaluationContext {
     private static final List<ConstructorResolver> constructorResolvers = Collections.singletonList(new SecuredContructorResolver());
 
     // Read only property access.
-    private static final List<PropertyAccessor> propertyAccessors = Collections.singletonList(DataBindingPropertyAccessor.forReadOnlyAccess());
+    private static final List<PropertyAccessor> propertyAccessors = Collections.singletonList(
+        DataBindingPropertyAccessor.forReadOnlyAccess()
+    );
 
     // Secure method resolver to allow only whitelisted methods.
     private static final List<MethodResolver> methodResolvers = Collections.singletonList(new SecuredMethodResolver());
@@ -49,7 +50,6 @@ public class SecuredEvaluationContext implements EvaluationContext {
     private final Map<String, Object> variables = new HashMap<>();
 
     public SecuredEvaluationContext() {
-
         // No root object by default.
         rootObject = TypedValue.NULL;
     }
@@ -76,7 +76,6 @@ public class SecuredEvaluationContext implements EvaluationContext {
 
     @Override
     public BeanResolver getBeanResolver() {
-
         // No bean resolver allowed.
         return null;
     }
@@ -103,13 +102,11 @@ public class SecuredEvaluationContext implements EvaluationContext {
 
     @Override
     public void setVariable(String name, Object value) {
-
         this.variables.put(name, value);
     }
 
     @Override
     public Object lookupVariable(String name) {
-
         return this.variables.get(name);
     }
 }

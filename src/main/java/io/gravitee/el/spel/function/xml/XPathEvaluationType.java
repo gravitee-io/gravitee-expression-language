@@ -22,7 +22,6 @@ import org.w3c.dom.Node;
  * @author GraviteeSource Team
  */
 public enum XPathEvaluationType {
-
     BOOLEAN_RESULT {
         public Object evaluateXPath(XPathExpression expression, Node node) {
             return expression.evaluateAsBoolean(node);
