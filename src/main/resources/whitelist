@@ -22,6 +22,8 @@ class java.text.MessageFormat
 
 class java.util.Calendar
 
+class io.gravitee.gateway.api.el.EvaluableSSLPrincipal
+
 # Allows by method signatures
 method java.lang.Object equals java.lang.Object
 method java.lang.Object hashCode
