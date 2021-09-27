@@ -137,7 +137,7 @@
     </build>
 
     <properties>
-        <json-path.version>2.5.0</json-path.version>
+        <json-path.version>2.6.0</json-path.version>
         <gravitee-common.version>1.17.2</gravitee-common.version>
         <jmh.version>1.21</jmh.version>
     </properties>
