@@ -79,6 +79,27 @@ public class SpelTemplateEngineTest {
     }
 
     @Test
+    public void shouldTransformWithRequestHeader_withSpaces() {
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setAll(
+            new HashMap<String, String>() {
+                {
+                    put("X-Gravitee-Endpoint", "my_api_host");
+                }
+            }
+        );
+
+        when(request.headers()).thenReturn(headers);
+        when(request.path()).thenReturn("/stores/99/products/123456");
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        String value = engine.convert("{ #request.headers['X-Gravitee-Endpoint'] }");
+        assertEquals("my_api_host", value);
+    }
+
+    @Test
     public void shouldTransformWithRequestHeader_getValue() {
         final HttpHeaders headers = new HttpHeaders();
         headers.setAll(
