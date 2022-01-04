@@ -15,10 +15,7 @@
  */
 package io.gravitee.el.spel.context;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.springframework.expression.*;
 import org.springframework.expression.spel.support.*;
 
@@ -32,8 +29,9 @@ public class SecuredEvaluationContext implements EvaluationContext {
     private static final List<ConstructorResolver> constructorResolvers = Collections.singletonList(new SecuredContructorResolver());
 
     // Read only property access.
-    private static final List<PropertyAccessor> propertyAccessors = Collections.singletonList(
-        DataBindingPropertyAccessor.forReadOnlyAccess()
+    private static final List<PropertyAccessor> propertyAccessors = Arrays.asList(
+        DataBindingPropertyAccessor.forReadOnlyAccess(),
+        new HttpHeadersPropertyAccessor()
     );
 
     // Secure method resolver to allow only whitelisted methods.

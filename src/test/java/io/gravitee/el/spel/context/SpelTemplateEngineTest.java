@@ -21,13 +21,13 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import io.gravitee.common.http.HttpHeaders;
 import io.gravitee.common.util.LinkedMultiValueMap;
 import io.gravitee.common.util.MultiValueMap;
 import io.gravitee.el.TemplateEngine;
 import io.gravitee.el.exceptions.ExpressionEvaluationException;
 import io.gravitee.el.spel.EvaluableRequest;
 import io.gravitee.el.spel.Request;
+import io.gravitee.gateway.api.http.HttpHeaders;
 import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -59,14 +59,7 @@ public class SpelTemplateEngineTest {
 
     @Test
     public void shouldTransformWithRequestHeader() {
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setAll(
-            new HashMap<String, String>() {
-                {
-                    put("X-Gravitee-Endpoint", "my_api_host");
-                }
-            }
-        );
+        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
 
         when(request.headers()).thenReturn(headers);
         when(request.path()).thenReturn("/stores/99/products/123456");
@@ -79,15 +72,56 @@ public class SpelTemplateEngineTest {
     }
 
     @Test
+    public void shouldTransformWithRequestHeader_concat() {
+        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
+
+        when(request.headers()).thenReturn(headers);
+        when(request.path()).thenReturn("/stores/99/products/123456");
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        String value = engine.convert("{#request.headers['X-Gravitee-Endpoint'] + '-custom'}");
+        assertEquals("my_api_host-custom", value);
+    }
+
+    @Test
+    public void shouldTransformWithRequestHeader_multipleValues() {
+        final HttpHeaders headers = HttpHeaders
+            .create()
+            .add("X-Gravitee-Endpoint", "my_api_host")
+            .add("X-Gravitee-Endpoint", "my_api_host2");
+
+        when(request.headers()).thenReturn(headers);
+        when(request.path()).thenReturn("/stores/99/products/123456");
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        String value = engine.convert("{#request.headers['X-Gravitee-Endpoint']}");
+        assertEquals("my_api_host,my_api_host2", value);
+    }
+
+    @Test
+    public void shouldTransformWithRequestHeader_multipleValues_withIndex() {
+        final HttpHeaders headers = HttpHeaders
+            .create()
+            .add("X-Gravitee-Endpoint", "my_api_host")
+            .add("X-Gravitee-Endpoint", "my_api_host2");
+
+        when(request.headers()).thenReturn(headers);
+        when(request.path()).thenReturn("/stores/99/products/123456");
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        String value = engine.convert("{#request.headers['X-Gravitee-Endpoint'][0]}");
+        assertEquals("my_api_host", value);
+    }
+
+    @Test
     public void shouldTransformWithRequestHeader_withSpaces() {
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setAll(
-            new HashMap<String, String>() {
-                {
-                    put("X-Gravitee-Endpoint", "my_api_host");
-                }
-            }
-        );
+        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
 
         when(request.headers()).thenReturn(headers);
         when(request.path()).thenReturn("/stores/99/products/123456");
@@ -101,14 +135,7 @@ public class SpelTemplateEngineTest {
 
     @Test
     public void shouldTransformWithRequestHeader_getValue() {
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setAll(
-            new HashMap<String, String>() {
-                {
-                    put("X-Gravitee-Endpoint", "my_api_host");
-                }
-            }
-        );
+        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
 
         when(request.headers()).thenReturn(headers);
         when(request.path()).thenReturn("/stores/99/products/123456");
@@ -188,14 +215,7 @@ public class SpelTemplateEngineTest {
 
     @Test
     public void shouldTransformWithProperties() {
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setAll(
-            new HashMap<String, String>() {
-                {
-                    put("X-Gravitee-Endpoint", "my_api_host");
-                }
-            }
-        );
+        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
 
         when(request.headers()).thenReturn(headers);
         when(request.path()).thenReturn("/stores/123");
@@ -216,14 +236,7 @@ public class SpelTemplateEngineTest {
 
     @Test
     public void shouldTransformJsonContent() {
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setAll(
-            new HashMap<String, String>() {
-                {
-                    put("X-Gravitee-Endpoint", "my_api_host");
-                }
-            }
-        );
+        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
 
         when(request.headers()).thenReturn(headers);
         when(request.path()).thenReturn("/stores/123");
@@ -404,7 +417,7 @@ public class SpelTemplateEngineTest {
 
     @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowToAddHeader() {
-        when(request.headers()).thenReturn(new HttpHeaders());
+        when(request.headers()).thenReturn(HttpHeaders.create());
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
@@ -414,7 +427,7 @@ public class SpelTemplateEngineTest {
 
     @Test(expected = ExpressionEvaluationException.class)
     public void shouldNotAllowToRemoveHeader() {
-        when(request.headers()).thenReturn(new HttpHeaders());
+        when(request.headers()).thenReturn(HttpHeaders.create());
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
