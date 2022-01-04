@@ -15,8 +15,8 @@
  */
 package io.gravitee.el.spel;
 
-import io.gravitee.common.http.HttpHeaders;
 import io.gravitee.common.util.MultiValueMap;
+import io.gravitee.gateway.api.http.HttpHeaders;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)

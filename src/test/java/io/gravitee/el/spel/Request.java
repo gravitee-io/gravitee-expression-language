@@ -15,10 +15,10 @@
  */
 package io.gravitee.el.spel;
 
-import io.gravitee.common.http.HttpHeaders;
 import io.gravitee.common.http.HttpMethod;
 import io.gravitee.common.http.HttpVersion;
 import io.gravitee.common.util.MultiValueMap;
+import io.gravitee.gateway.api.http.HttpHeaders;
 import java.time.Instant;
 
 /**
