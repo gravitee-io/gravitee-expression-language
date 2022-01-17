@@ -532,4 +532,31 @@ public class SpelTemplateEngineTest {
 
         engine.getValue(expression, Exception.class);
     }
+
+    @Test
+    public void shouldEvaluateSimpleContentWithNewline() {
+        String expression = "{\n  \"status\": \"OK\"\n}";
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        String value = engine.getValue(expression, String.class);
+        assertEquals(value, expression);
+    }
+
+    @Test
+    public void shouldEvaluateSimpleContentWithTab() {
+        String expression = "{\t\"status\": \"OK\"  }";
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        String value = engine.getValue(expression, String.class);
+        assertEquals(value, expression);
+    }
+
+    @Test
+    public void shouldEvaluateSimpleContentWithSpace() {
+        String expression = "{ \"status\": \"OK\"  }";
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        String value = engine.getValue(expression, String.class);
+        assertEquals(value, expression);
+    }
 }
