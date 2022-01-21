@@ -2,6 +2,6 @@
 
 ifdef::env-github[]
 image:https://ci.gravitee.io/buildStatus/icon?job=gravitee-io/gravitee-expression-language/master["Build status", link="https://ci.gravitee.io/buildStatus/icon?job=gravitee-io/gravitee-expression-language/master/"]
-https://community.gravitee.io?utm_source=readme[Join the community forum]
+image:https://f.hubspotusercontent40.net/hubfs/7600448/gravitee-github-button.jpg["Join the community forum", link="https://community.gravitee.io?utm_source=readme", height=20]
 endif::[]
 
