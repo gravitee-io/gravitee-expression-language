@@ -86,6 +86,20 @@ public class SpelTemplateEngineTest {
     }
 
     @Test
+    public void shouldTransformWithRequestHeader_concat_prefix() {
+        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
+
+        when(request.headers()).thenReturn(headers);
+        when(request.path()).thenReturn("/stores/99/products/123456");
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        String value = engine.convert("custom-{#request.headers['X-Gravitee-Endpoint']}");
+        assertEquals("custom-my_api_host", value);
+    }
+
+    @Test
     public void shouldTransformWithRequestHeader_multipleValues() {
         final HttpHeaders headers = HttpHeaders
             .create()
