@@ -27,6 +27,8 @@ import io.gravitee.el.TemplateEngine;
 import io.gravitee.el.exceptions.ExpressionEvaluationException;
 import io.gravitee.el.spel.EvaluableRequest;
 import io.gravitee.el.spel.Request;
+import io.gravitee.gateway.api.Response;
+import io.gravitee.gateway.api.context.SimpleExecutionContext;
 import io.gravitee.gateway.api.http.HttpHeaders;
 import java.util.*;
 import org.junit.Assert;
@@ -572,5 +574,29 @@ public class SpelTemplateEngineTest {
 
         String value = engine.getValue(expression, String.class);
         assertEquals(value, expression);
+    }
+
+    @Test
+    public void shouldReadMapValueWithDot() {
+        final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+        parameters.put("param", Collections.singletonList("myparam"));
+
+        when(request.parameters()).thenReturn(parameters);
+        when(request.path()).thenReturn("/stores/99/products/123456");
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        MultiValueMap<String, String> paramsValue = engine.getValue("{#request.params}", MultiValueMap.class);
+        assertEquals("myparam", engine.getValue("{#request.params['param']}", String.class));
+        assertEquals("myparam", engine.getValue("{#request.params.param}", String.class));
+
+        io.gravitee.gateway.api.Request req = Mockito.mock(io.gravitee.gateway.api.Request.class);
+        Response res = Mockito.mock(Response.class);
+        SimpleExecutionContext simpleExecutionContext = new SimpleExecutionContext(req, res);
+        simpleExecutionContext.setAttribute("gravitee.attribute.api", "my-api-id");
+        engine.getTemplateContext().setVariable("context", simpleExecutionContext);
+        assertEquals("my-api-id", engine.getValue("{#context.attributes['api']}", String.class));
+        assertEquals("my-api-id", engine.getValue("{#context.attributes.api}", String.class));
     }
 }
