@@ -31,7 +31,8 @@ public class SecuredEvaluationContext implements EvaluationContext {
     // Read only property access.
     private static final List<PropertyAccessor> propertyAccessors = Arrays.asList(
         DataBindingPropertyAccessor.forReadOnlyAccess(),
-        new HttpHeadersPropertyAccessor()
+        new HttpHeadersPropertyAccessor(),
+        new ReadOnlyMapAccessor()
     );
 
     // Secure method resolver to allow only whitelisted methods.
