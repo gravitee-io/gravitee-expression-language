@@ -599,4 +599,18 @@ public class SpelTemplateEngineTest {
         assertEquals("my-api-id", engine.getValue("{#context.attributes['api']}", String.class));
         assertEquals("my-api-id", engine.getValue("{#context.attributes.api}", String.class));
     }
+
+    @Test
+    public void shouldEvaluateWithBrackets() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("timestamp", 3);
+
+        assertFalse(engine.getValue("{ (#timestamp > 2) && (#timestamp < 2) }", Boolean.class));
+    }
+
+    @Test
+    public void shouldEvaluateBooleanWithoutBraces() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        assertTrue(engine.getValue("true", Boolean.class));
+    }
 }
