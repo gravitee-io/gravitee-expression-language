@@ -18,6 +18,8 @@ package io.gravitee.el.spel.context;
 import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_LIST_KEY;
 import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_MODE_KEY;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -99,6 +101,19 @@ public class SpelTemplateEngineTest {
 
         String value = engine.convert("custom-{#request.headers['X-Gravitee-Endpoint']}");
         assertEquals("custom-my_api_host", value);
+    }
+
+    @Test
+    public void shouldTransformWithRequestHeader_emptyHeaderList() {
+        HttpHeaders headers = mock(HttpHeaders.class);
+
+        when(headers.getAll(any())).thenReturn(Collections.emptyList());
+        when(request.headers()).thenReturn(headers);
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        assertTrue(engine.getValue("{#request.headers['X-Gravitee-Endpoint'] == null}", Boolean.class));
     }
 
     @Test

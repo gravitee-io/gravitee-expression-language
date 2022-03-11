@@ -46,7 +46,7 @@ public class HttpHeadersPropertyAccessor implements PropertyAccessor {
 
         List<String> values = headers.getAll(name);
 
-        if (values == null) {
+        if (values == null || values.isEmpty()) {
             return TypedValue.NULL;
         }
 
