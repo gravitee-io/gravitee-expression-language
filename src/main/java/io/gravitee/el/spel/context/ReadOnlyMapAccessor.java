@@ -15,15 +15,33 @@
  */
 package io.gravitee.el.spel.context;
 
+import java.util.Map;
 import org.springframework.context.expression.MapAccessor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.TypedValue;
 
 /**
  * @author Guillaume CUSNIEUX (guillaume.cusnieux at graviteesource.com)
  * @author GraviteeSource Team
  */
 public class ReadOnlyMapAccessor extends MapAccessor {
+
+    @Override
+    public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+        Map<?, ?> map = (Map) target;
+        Object value = map.get(name);
+        if (value == null && !map.containsKey(name)) {
+            return TypedValue.NULL;
+        } else {
+            return new TypedValue(value);
+        }
+    }
+
+    @Override
+    public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+        return true;
+    }
 
     @Override
     public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
