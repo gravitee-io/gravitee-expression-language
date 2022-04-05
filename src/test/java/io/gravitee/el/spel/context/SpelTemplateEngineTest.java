@@ -613,6 +613,8 @@ public class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("context", simpleExecutionContext);
         assertEquals("my-api-id", engine.getValue("{#context.attributes['api']}", String.class));
         assertEquals("my-api-id", engine.getValue("{#context.attributes.api}", String.class));
+        assertEquals(null, engine.getValue("{#context.attributes['application']}", String.class));
+        assertEquals(null, engine.getValue("{#context.attributes.application}", String.class));
     }
 
     @Test
