@@ -36,7 +36,7 @@
     <properties>
         <json-path.version>2.6.0</json-path.version>
         <gravitee-common.version>1.25.0</gravitee-common.version>
-        <gravitee-gateway-api.version>1.31.1</gravitee-gateway-api.version>
+        <gravitee-gateway-api.version>1.32.2</gravitee-gateway-api.version>
         <jmh.version>1.21</jmh.version>
     </properties>
 
