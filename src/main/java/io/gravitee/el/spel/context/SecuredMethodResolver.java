@@ -15,9 +15,8 @@
  */
 package io.gravitee.el.spel.context;
 
+import io.reactivex.annotations.NonNull;
 import java.lang.reflect.Method;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.support.ReflectiveMethodResolver;
 
 /**
@@ -27,14 +26,14 @@ import org.springframework.expression.spel.support.ReflectiveMethodResolver;
  */
 public class SecuredMethodResolver extends ReflectiveMethodResolver {
 
-    private static final Logger logger = LoggerFactory.getLogger(SecuredMethodResolver.class);
     public static final String EL_WHITELIST_MODE_KEY = "el.whitelist.mode";
     public static final String EL_WHITELIST_LIST_KEY = "el.whitelist.list";
 
     public static SecuredResolver securedResolver = SecuredResolver.getInstance();
 
+    @NonNull
     @Override
-    public Method[] getMethods(Class<?> type) {
+    public Method[] getMethods(@NonNull Class<?> type) {
         return securedResolver.getMethods(type);
     }
 }

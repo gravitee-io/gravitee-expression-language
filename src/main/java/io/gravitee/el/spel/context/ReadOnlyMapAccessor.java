@@ -15,6 +15,7 @@
  */
 package io.gravitee.el.spel.context;
 
+import io.reactivex.annotations.NonNull;
 import java.util.Map;
 import org.springframework.context.expression.MapAccessor;
 import org.springframework.expression.AccessException;
@@ -27,9 +28,10 @@ import org.springframework.expression.TypedValue;
  */
 public class ReadOnlyMapAccessor extends MapAccessor {
 
+    @NonNull
     @Override
-    public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-        Map<?, ?> map = (Map) target;
+    public TypedValue read(@NonNull EvaluationContext context, Object target, @NonNull String name) throws AccessException {
+        Map<?, ?> map = (Map<?, ?>) target;
         Object value = map.get(name);
         if (value == null && !map.containsKey(name)) {
             return TypedValue.NULL;
@@ -39,12 +41,12 @@ public class ReadOnlyMapAccessor extends MapAccessor {
     }
 
     @Override
-    public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-        return true;
+    public boolean canRead(@NonNull EvaluationContext context, Object target, @NonNull String name) throws AccessException {
+        return target instanceof Map;
     }
 
     @Override
-    public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+    public boolean canWrite(@NonNull EvaluationContext context, Object target, @NonNull String name) throws AccessException {
         return false;
     }
 }

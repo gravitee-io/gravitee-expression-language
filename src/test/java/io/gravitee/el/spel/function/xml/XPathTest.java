@@ -15,8 +15,8 @@
  */
 package io.gravitee.el.spel.function.xml;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -35,6 +35,6 @@ public class XPathTest {
             "</root>";
 
         Object lastname = XPathFunction.evaluate(input, ".//lastname");
-        Assert.assertEquals("DOE", lastname);
+        Assertions.assertEquals("DOE", lastname);
     }
 }

@@ -16,8 +16,17 @@
 package io.gravitee.el.spel.context;
 
 import io.gravitee.el.TemplateContext;
+import io.gravitee.el.spel.CachedExpression;
 import io.gravitee.el.spel.function.json.JsonPathFunction;
 import io.gravitee.el.spel.function.xml.XPathFunction;
+import io.reactivex.Completable;
+import io.reactivex.Flowable;
+import io.reactivex.Maybe;
+import io.reactivex.Single;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import org.springframework.beans.BeanUtils;
 import org.springframework.expression.EvaluationContext;
 
@@ -27,18 +36,35 @@ import org.springframework.expression.EvaluationContext;
  */
 public class SpelTemplateContext implements TemplateContext {
 
+    protected static final Method JSON_PATH_EVAL_METHOD = BeanUtils.resolveSignature("evaluate", JsonPathFunction.class);
+    protected static final Method XPATH_EVAL_METHOD = BeanUtils.resolveSignature("evaluate", XPathFunction.class);
     private final EvaluationContext context;
+    private Map<String, Object> deferredVariables;
 
     public SpelTemplateContext() {
         context = new SecuredEvaluationContext();
-
-        context.setVariable("jsonPath", BeanUtils.resolveSignature("evaluate", JsonPathFunction.class));
-        context.setVariable("xpath", BeanUtils.resolveSignature("evaluate", XPathFunction.class));
+        context.setVariable("jsonPath", JSON_PATH_EVAL_METHOD);
+        context.setVariable("xpath", XPATH_EVAL_METHOD);
     }
 
     @Override
     public void setVariable(String name, Object value) {
         context.setVariable(name, value);
+    }
+
+    @Override
+    public void setDeferredVariable(String name, Completable deferred) {
+        addDeferredVariable(name, deferred);
+    }
+
+    @Override
+    public void setDeferredVariable(String name, Maybe<?> deferred) {
+        addDeferredVariable(name, deferred);
+    }
+
+    @Override
+    public void setDeferredVariable(String name, Single<?> deferred) {
+        addDeferredVariable(name, deferred);
     }
 
     @Override
@@ -48,5 +74,46 @@ public class SpelTemplateContext implements TemplateContext {
 
     public EvaluationContext getContext() {
         return context;
+    }
+
+    public Single<EvaluationContext> evaluationContext(CachedExpression expression) {
+        if (deferredVariables != null) {
+            return Flowable
+                .fromIterable(deferredVariables.entrySet())
+                .filter(deferredEntry -> requiresDeferredVariable(expression, deferredEntry))
+                .flatMapCompletable(e -> resolveDeferred(e.getKey(), e.getValue()))
+                .andThen(Single.just(context));
+        }
+
+        return Single.just(context);
+    }
+
+    private boolean requiresDeferredVariable(CachedExpression expression, Map.Entry<String, Object> deferredEntry) {
+        // Ex: expression: 'request.contentJson.test', variable 'request.contentJson'
+        return expression
+            .getVariables()
+            .stream()
+            .anyMatch(variable -> variable.equals(deferredEntry.getKey()) || variable.startsWith(deferredEntry.getKey() + "."));
+    }
+
+    private Completable resolveDeferred(String key, Object deferred) {
+        if (deferred instanceof Completable) {
+            return (Completable) deferred;
+        } else if (deferred instanceof Maybe) {
+            return ((Maybe<?>) deferred).doOnSuccess(o -> context.setVariable(key, o)).ignoreElement();
+        } else if (deferred instanceof Single) {
+            return ((Single<?>) deferred).doOnSuccess(o -> context.setVariable(key, o)).ignoreElement();
+        }
+
+        return Completable.error(new RuntimeException("Deferred EL variable unsupported" + deferred.getClass().getSimpleName()));
+    }
+
+    private void addDeferredVariable(String name, Object deferred) {
+        Objects.requireNonNull(deferred, "Deferred EL variable cannot be null");
+        if (deferredVariables == null) {
+            deferredVariables = new HashMap<>();
+        }
+
+        deferredVariables.put(name, deferred);
     }
 }
