@@ -23,8 +23,10 @@ import io.gravitee.el.TemplateEngineFactory;
  */
 public class SpelTemplateEngineFactory implements TemplateEngineFactory {
 
+    private static final SpelExpressionParser EXPRESSION_PARSER = new SpelExpressionParser();
+
     @Override
     public TemplateEngine templateEngine() {
-        return new SpelTemplateEngine();
+        return new SpelTemplateEngine(EXPRESSION_PARSER);
     }
 }

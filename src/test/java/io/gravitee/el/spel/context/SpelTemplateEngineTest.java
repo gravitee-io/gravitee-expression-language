@@ -17,11 +17,9 @@ package io.gravitee.el.spel.context;
 
 import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_LIST_KEY;
 import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_MODE_KEY;
-import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import io.gravitee.common.util.LinkedMultiValueMap;
 import io.gravitee.common.util.MultiValueMap;
@@ -32,33 +30,32 @@ import io.gravitee.el.spel.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.context.SimpleExecutionContext;
 import io.gravitee.gateway.api.http.HttpHeaders;
+import io.reactivex.observers.TestObserver;
 import java.util.*;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
-import org.springframework.util.StringUtils;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
+@ExtendWith(MockitoExtension.class)
 public class SpelTemplateEngineTest {
 
     @Mock
     protected Request request;
 
-    @Before
+    @BeforeEach
     public void init() {
-        initMocks(this);
-        SecuredResolver.initialize(null);
+        reinitSecuredResolver(null);
     }
 
     @Test
@@ -66,13 +63,12 @@ public class SpelTemplateEngineTest {
         final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
 
         when(request.headers()).thenReturn(headers);
-        when(request.path()).thenReturn("/stores/99/products/123456");
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        String value = engine.convert("{#request.headers['X-Gravitee-Endpoint']}");
-        assertEquals("my_api_host", value);
+        final TestObserver<String> obs = engine.eval("{#request.headers['X-Gravitee-Endpoint']}", String.class).test();
+        obs.assertResult("my_api_host");
     }
 
     @Test
@@ -80,13 +76,12 @@ public class SpelTemplateEngineTest {
         final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
 
         when(request.headers()).thenReturn(headers);
-        when(request.path()).thenReturn("/stores/99/products/123456");
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        String value = engine.convert("{#request.headers['X-Gravitee-Endpoint'] + '-custom'}");
-        assertEquals("my_api_host-custom", value);
+        final TestObserver<String> obs = engine.eval("{#request.headers['X-Gravitee-Endpoint'] + '-custom'}", String.class).test();
+        obs.assertResult("my_api_host-custom");
     }
 
     @Test
@@ -94,13 +89,12 @@ public class SpelTemplateEngineTest {
         final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
 
         when(request.headers()).thenReturn(headers);
-        when(request.path()).thenReturn("/stores/99/products/123456");
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        String value = engine.convert("custom-{#request.headers['X-Gravitee-Endpoint']}");
-        assertEquals("custom-my_api_host", value);
+        final TestObserver<String> obs = engine.eval("custom-{#request.headers['X-Gravitee-Endpoint']}", String.class).test();
+        obs.assertResult("custom-my_api_host");
     }
 
     @Test
@@ -113,7 +107,8 @@ public class SpelTemplateEngineTest {
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        assertTrue(engine.getValue("{#request.headers['X-Gravitee-Endpoint'] == null}", Boolean.class));
+        final TestObserver<Boolean> obs = engine.eval("{#request.headers['X-Gravitee-Endpoint'] == null}", Boolean.class).test();
+        obs.assertResult(true);
     }
 
     @Test
@@ -124,13 +119,12 @@ public class SpelTemplateEngineTest {
             .add("X-Gravitee-Endpoint", "my_api_host2");
 
         when(request.headers()).thenReturn(headers);
-        when(request.path()).thenReturn("/stores/99/products/123456");
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        String value = engine.convert("{#request.headers['X-Gravitee-Endpoint']}");
-        assertEquals("my_api_host,my_api_host2", value);
+        final TestObserver<String> obs = engine.eval("{#request.headers['X-Gravitee-Endpoint']}", String.class).test();
+        obs.assertResult("my_api_host,my_api_host2");
     }
 
     @Test
@@ -141,13 +135,12 @@ public class SpelTemplateEngineTest {
             .add("X-Gravitee-Endpoint", "my_api_host2");
 
         when(request.headers()).thenReturn(headers);
-        when(request.path()).thenReturn("/stores/99/products/123456");
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        String value = engine.convert("{#request.headers['X-Gravitee-Endpoint'][0]}");
-        assertEquals("my_api_host", value);
+        final TestObserver<String> obs = engine.eval("{#request.headers['X-Gravitee-Endpoint'][0]}", String.class).test();
+        obs.assertResult("my_api_host");
     }
 
     @Test
@@ -155,29 +148,29 @@ public class SpelTemplateEngineTest {
         final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
 
         when(request.headers()).thenReturn(headers);
-        when(request.path()).thenReturn("/stores/99/products/123456");
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        String value = engine.convert("{ #request.headers['X-Gravitee-Endpoint'] }");
-        assertEquals("my_api_host", value);
+        final TestObserver<String> obs = engine.eval("{ #request.headers['X-Gravitee-Endpoint'] }", String.class).test();
+        obs.assertResult("my_api_host");
     }
 
     @Test
     public void shouldTransformWithRequestHeader_getValue() {
         final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
+        final EvaluableRequest evaluableRequest = new EvaluableRequest(this.request);
 
         when(request.headers()).thenReturn(headers);
-        when(request.path()).thenReturn("/stores/99/products/123456");
 
         TemplateEngine engine = TemplateEngine.templateEngine();
-        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+        engine.getTemplateContext().setVariable("request", evaluableRequest);
 
-        EvaluableRequest value = engine.getValue("{#request}", EvaluableRequest.class);
-        HttpHeaders headersValue = engine.getValue("{#request.headers}", HttpHeaders.class);
-        assertEquals("my_api_host", value.getHeaders().getFirst("X-Gravitee-Endpoint"));
-        assertEquals("my_api_host", headersValue.getFirst("X-Gravitee-Endpoint"));
+        final TestObserver<EvaluableRequest> requestObs = engine.eval("{#request}", EvaluableRequest.class).test();
+        requestObs.assertResult(evaluableRequest);
+
+        final TestObserver<HttpHeaders> headersObs = engine.eval("{#request.headers}", HttpHeaders.class).test();
+        headersObs.assertResult(headers);
     }
 
     @Test
@@ -186,30 +179,31 @@ public class SpelTemplateEngineTest {
         parameters.put("param", Collections.singletonList("myparam"));
 
         when(request.parameters()).thenReturn(parameters);
-        when(request.path()).thenReturn("/stores/99/products/123456");
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        String value = engine.convert("{#request.params['param']}");
-        assertEquals("myparam", value);
+        final TestObserver<String> obs = engine.eval("{#request.params['param']}", String.class).test();
+        obs.assertResult("myparam");
     }
 
     @Test
     public void shouldTransformWithRequestQueryParameter_getValue() {
         final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+        final EvaluableRequest evaluableRequest = new EvaluableRequest(this.request);
+
         parameters.put("param", Collections.singletonList("myparam"));
 
         when(request.parameters()).thenReturn(parameters);
-        when(request.path()).thenReturn("/stores/99/products/123456");
 
         TemplateEngine engine = TemplateEngine.templateEngine();
-        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+        engine.getTemplateContext().setVariable("request", evaluableRequest);
 
-        EvaluableRequest value = engine.getValue("{#request}", EvaluableRequest.class);
-        MultiValueMap<String, String> paramsValue = engine.getValue("{#request.params}", MultiValueMap.class);
-        assertEquals("myparam", value.getParams().getFirst("param"));
-        assertEquals("myparam", paramsValue.getFirst("param"));
+        final TestObserver<EvaluableRequest> requestObs = engine.eval("{#request}", EvaluableRequest.class).test();
+        requestObs.assertResult(evaluableRequest);
+
+        final TestObserver<MultiValueMap> headersObs = engine.eval("{#request.params}", MultiValueMap.class).test();
+        headersObs.assertResult(parameters);
     }
 
     @Test
@@ -218,37 +212,18 @@ public class SpelTemplateEngineTest {
         parameters.put("param", Arrays.asList("myparam", "myparam2"));
 
         when(request.parameters()).thenReturn(parameters);
-        when(request.path()).thenReturn("/stores/99/products/123456");
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        String value = engine.convert("{#request.params['param'][1]}");
-        assertEquals("myparam2", value);
-    }
-
-    @Test
-    public void shouldTransformWithRequestQueryParameterMultipleValues_getValue() {
-        final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-        parameters.put("param", Arrays.asList("myparam", "myparam2"));
-
-        when(request.parameters()).thenReturn(parameters);
-        when(request.path()).thenReturn("/stores/99/products/123456");
-
-        TemplateEngine engine = TemplateEngine.templateEngine();
-        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
-
-        EvaluableRequest value = engine.getValue("{#request}", EvaluableRequest.class);
-        MultiValueMap<String, String> paramsValue = engine.getValue("{#request.params}", MultiValueMap.class);
-        assertEquals("myparam2", value.getParams().get("param").get(1));
-        assertEquals("myparam2", paramsValue.get("param").get(1));
+        final TestObserver<String> obs = engine.eval("{#request.params['param'][1]}", String.class).test();
+        obs.assertResult("myparam2");
     }
 
     @Test
     public void shouldTransformWithProperties() {
         final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
 
-        when(request.headers()).thenReturn(headers);
         when(request.path()).thenReturn("/stores/123");
 
         final Map<String, Object> properties = new HashMap<>();
@@ -259,17 +234,17 @@ public class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
         engine.getTemplateContext().setVariable("properties", properties);
 
-        String value = engine.convert(
-            "<user><id>{#request.paths[2]}</id><name>{#properties['name_123']}</name><firstname>{#properties['firstname_' + #request.paths[2]]}</firstname></user>"
-        );
-        assertNotNull(value);
+        final TestObserver<String> obs = engine
+            .eval(
+                "<user><id>{#request.paths[2]}</id><name>{#properties['name_123']}</name><firstname>{#properties['firstname_' + #request.paths[2]]}</firstname></user>",
+                String.class
+            )
+            .test();
+        obs.assertResult("<user><id>123</id><name>Doe</name><firstname>John</firstname></user>");
     }
 
     @Test
     public void shouldTransformJsonContent() {
-        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "my_api_host");
-
-        when(request.headers()).thenReturn(headers);
         when(request.path()).thenReturn("/stores/123");
 
         final Map<String, Object> properties = new HashMap<>();
@@ -280,17 +255,21 @@ public class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
         engine.getTemplateContext().setVariable("properties", properties);
 
-        String content = "[{id: {#request.paths[2]}, firstname: {#properties['firstname_123']}, name: {#properties['name_123']}, age: 0}]";
-        String value = engine.convert(content);
-        assertNotNull(value);
+        final TestObserver<String> obs = engine
+            .eval(
+                "[{id: {#request.paths[2]}, firstname: {#properties['firstname_123']}, name: {#properties['name_123']}, age: 0}]",
+                String.class
+            )
+            .test();
+        obs.assertResult("[{id: 123, firstname: John, name: Doe, age: 0}]");
     }
 
     @Test
     public void shouldCallRandomFunction() {
         TemplateEngine engine = TemplateEngine.templateEngine();
-        String content = "age: {(T(java.lang.Math).random() * 60).intValue()}";
-        String value = engine.convert(content);
-        assertNotNull(value);
+        final TestObserver<String> obs = engine.eval("age: {(T(java.lang.Math).random() * 60).intValue()}", String.class).test();
+        obs.assertValue(v -> v.matches("age: \\d+"));
+        obs.assertComplete();
     }
 
     @Test
@@ -310,16 +289,16 @@ public class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("request", req);
 
         String content = "{#xpath(#request.content, './/lastname')}";
-        String value = engine.convert(content);
-        assertEquals("DOE", value);
+        TestObserver<String> obs = engine.eval(content, String.class).test();
+        obs.assertResult("DOE");
 
         content = "{#xpath(#request.content, './/age', 'number') + 20}";
-        value = engine.convert(content);
-        assertEquals("55.0", value);
+        obs = engine.eval(content, String.class).test();
+        obs.assertResult("55.0");
 
         content = "{#xpath(#request.content, './/something')}";
-        value = engine.convert(content);
-        assertTrue(StringUtils.isEmpty(value));
+        obs = engine.eval(content, String.class).test();
+        obs.assertResult("");
     }
 
     @Test
@@ -331,16 +310,16 @@ public class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("request", req);
 
         String content = "{#jsonPath(#request.content, '$.lastname')}";
-        String value = engine.convert(content);
-        assertEquals("DOE", value);
+        TestObserver<String> obs = engine.eval(content, String.class).test();
+        obs.assertResult("DOE");
 
         content = "{#jsonPath(#request.content, '$.age') + 20}";
-        value = engine.convert(content);
-        assertEquals("55", value);
+        obs = engine.eval(content, String.class).test();
+        obs.assertResult("55");
 
         content = "{#jsonPath(#request.content, '$.something')}";
-        value = engine.convert(content);
-        Assert.assertNull(value);
+        obs = engine.eval(content, String.class).test();
+        obs.assertResult();
     }
 
     @Test
@@ -348,17 +327,11 @@ public class SpelTemplateEngineTest {
         EvaluableRequest req = Mockito.mock(EvaluableRequest.class);
         when(req.getContent()).thenReturn("pong\n");
 
-        String assertion = "#response.content.startsWith('pong')";
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", req);
 
-        ExpressionParser parser = new SpelExpressionParser();
-        Expression expr = parser.parseExpression(assertion);
-
-        StandardEvaluationContext context = new StandardEvaluationContext();
-        context.setVariable("response", req);
-
-        boolean success = expr.getValue(context, boolean.class);
-
-        assertTrue(success);
+        final TestObserver<Boolean> obs = engine.eval("{#request.content.startsWith('pong')}", Boolean.class).test();
+        obs.assertResult(true);
     }
 
     @Test
@@ -367,16 +340,16 @@ public class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("profile", "{ \"lastname\": \"DOE\", \"firstname\": \"JOHN\", \"age\": 35 }");
 
         String content = "{#jsonPath(#profile, '$.identity_provider_id') == 'idp_6'}";
-        boolean result = engine.getValue(content, boolean.class);
-        Assert.assertFalse(result);
+        TestObserver<Boolean> obs = engine.eval(content, Boolean.class).test();
+        obs.assertResult(false);
 
         content = "{#jsonPath(#profile, '$.lastname') == 'DOE'}";
-        result = engine.getValue(content, boolean.class);
-        assertTrue(result);
+        obs = engine.eval(content, Boolean.class).test();
+        obs.assertResult(true);
 
         content = "{#jsonPath(#profile, '$.lastname') == 'DONE'}";
-        result = engine.getValue(content, boolean.class);
-        Assert.assertFalse(result);
+        obs = engine.eval(content, Boolean.class).test();
+        obs.assertResult(false);
     }
 
     @Test
@@ -394,76 +367,80 @@ public class SpelTemplateEngineTest {
             );
 
         String content = "{#jsonPath(#profile, '$.groups').contains('Group2')}";
-        boolean result = engine.getValue(content, boolean.class);
-        assertTrue(result);
+        TestObserver<Boolean> obs = engine.eval(content, Boolean.class).test();
+        obs.assertResult(true);
 
         content = "{#jsonPath(#profile, '$.groups').contains('Group4')}";
-        result = engine.getValue(content, boolean.class);
-        Assert.assertFalse(result);
+        obs = engine.eval(content, Boolean.class).test();
+        obs.assertResult(false);
 
         content = "{#jsonPath(#profile, '$.emptiness').contains('Group4')}";
-        result = engine.getValue(content, boolean.class);
-        Assert.assertFalse(result);
+        obs = engine.eval(content, Boolean.class).test();
+        obs.assertResult(false);
 
         content = "{#jsonPath(#profile, '$.nothingness')?.contains('Group4')?:false}";
-        result = engine.getValue(content, boolean.class);
-        Assert.assertFalse(result);
+        obs = engine.eval(content, Boolean.class).test();
+        obs.assertResult(false);
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowedClassMethod() {
         String expression = "{T(java.lang.Class).forName('java.lang.Math')}";
-        TemplateEngine engine = TemplateEngine.templateEngine();
+        final TemplateEngine engine = TemplateEngine.templateEngine();
 
-        engine.getValue(expression, Object.class);
+        final TestObserver<Object> obs = engine.eval(expression, Object.class).test();
+        obs.assertError(ExpressionEvaluationException.class);
     }
 
     @Test
     public void shouldAllowMathMethod() {
         String expression = "{T(java.lang.Math).abs(60)}";
-        TemplateEngine engine = TemplateEngine.templateEngine();
+        final TemplateEngine engine = TemplateEngine.templateEngine();
 
-        assertEquals((Integer) 60, engine.getValue(expression, Integer.class));
+        final TestObserver<Integer> obs = engine.eval(expression, Integer.class).test();
+        obs.assertResult(60);
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowAddParam() {
         when(request.parameters()).thenReturn(new LinkedMultiValueMap<>());
 
-        TemplateEngine engine = TemplateEngine.templateEngine();
+        final TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        engine.getValue("{#request.params.add('test', 'test')}", String.class);
+        final TestObserver<Object> obs = engine.eval("{#request.params.add('test', 'test')}", Object.class).test();
+        obs.assertError(ExpressionEvaluationException.class);
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowRemoveParam() {
         when(request.parameters()).thenReturn(new LinkedMultiValueMap<>());
 
-        TemplateEngine engine = TemplateEngine.templateEngine();
+        final TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        engine.getValue("{#request.params.remove('test')}", String.class);
+        final TestObserver<Object> obs = engine.eval("{#request.params.remove('test')}", Object.class).test();
+        obs.assertError(ExpressionEvaluationException.class);
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowToAddHeader() {
-        when(request.headers()).thenReturn(HttpHeaders.create());
-
-        TemplateEngine engine = TemplateEngine.templateEngine();
+        final TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        engine.getValue("{#request.headers.add('X-Gravitee-Endpoint', 'test')}", String.class);
+        final TestObserver<Object> obs = engine.eval("{#request.headers.add('X-Gravitee-Endpoint', 'test')}", Object.class).test();
+        obs.assertError(ExpressionEvaluationException.class);
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowToRemoveHeader() {
         when(request.headers()).thenReturn(HttpHeaders.create());
 
-        TemplateEngine engine = TemplateEngine.templateEngine();
+        final TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        engine.getValue("{#request.headers.remove('X-Gravitee-Endpoint')}", String.class);
+        final TestObserver<Object> obs = engine.eval("{#request.headers.remove('X-Gravitee-Endpoint')}", Object.class).test();
+        obs.assertError(ExpressionEvaluationException.class);
     }
 
     @Test
@@ -474,68 +451,69 @@ public class SpelTemplateEngineTest {
         LinkedList<String> linkedList = new LinkedList<>();
         linkedList.add("test");
 
-        TemplateEngine engine = TemplateEngine.templateEngine();
+        final TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("list", list);
         engine.getTemplateContext().setVariable("linkedList", linkedList);
 
-        assertTrue(engine.getValue("{# list.contains('test') and #linkedList.contains('test')}", Boolean.class));
+        final TestObserver<Boolean> obs = engine.eval("{# list.contains('test') and #linkedList.contains('test')}", Boolean.class).test();
+        obs.assertResult(true);
     }
 
     @Test
     public void shouldAllowMethodFromConfiguration() {
         ConfigurableEnvironment environment = new MockEnvironment()
             .withProperty(EL_WHITELIST_MODE_KEY, "append")
-            .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "method java.lang.System getenv");
+            .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "method java.lang.System getenv");
 
-        SecuredResolver.initialize(environment);
+        reinitSecuredResolver(environment);
 
-        TemplateEngine engine = TemplateEngine.templateEngine();
-        assertEquals(System.getenv(), engine.getValue("{(T(java.lang.System)).getenv()}", Map.class));
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        final TestObserver<Map> obs = engine.eval("{(T(java.lang.System)).getenv()}", Map.class).test();
+        obs.assertResult(System.getenv());
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowMethodWhenBuiltInWhitelistNotLoaded() {
         ConfigurableEnvironment environment = new MockEnvironment()
             .withProperty(EL_WHITELIST_MODE_KEY, "replace") // The configured whitelist replaces the built-in (doesn't contains Math.abs(int) method).
-            .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "method java.lang.System getenv");
+            .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "method java.lang.System getenv");
 
-        SecuredResolver.initialize(environment);
+        reinitSecuredResolver(environment);
 
-        String expression = "{T(java.lang.Math).abs(60)}";
-        TemplateEngine engine = TemplateEngine.templateEngine();
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        engine.getValue(expression, Object.class);
+        final TestObserver<Object> obs = engine.eval("{T(java.lang.Math).abs(30)}", Object.class).test();
+        obs.assertError(ExpressionEvaluationException.class);
     }
 
     @Test
     public void shouldIgnoreUnknownWhitelistedClassesOrMethods() {
         ConfigurableEnvironment environment = new MockEnvironment()
             .withProperty(EL_WHITELIST_MODE_KEY, "append")
-            .withProperty(EL_WHITELIST_LIST_KEY + "[O]", "class io.gravitee.Unknown")
+            .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "class io.gravitee.Unknown")
             .withProperty(EL_WHITELIST_LIST_KEY + "[1]", "method java.lang.Math unknown");
 
-        SecuredResolver.initialize(environment);
+        reinitSecuredResolver(environment);
 
-        String expression = "{T(java.lang.Math).abs(60)}";
-        TemplateEngine engine = TemplateEngine.templateEngine();
+        final TemplateEngine engine = TemplateEngine.templateEngine();
 
-        assertEquals((Integer) 60, engine.getValue(expression, Integer.class));
+        final TestObserver<Integer> obs = engine.eval("{T(java.lang.Math).abs(60)}", Integer.class).test();
+        obs.assertResult(60);
     }
 
     @Test
     public void shouldAllowConstructorsFromWhitelistedClasses() {
-        String expression = "{(new java.lang.String(\"Gravitee\"))}";
-        TemplateEngine engine = TemplateEngine.templateEngine();
-
-        assertEquals("Gravitee", engine.getValue(expression, String.class));
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        final TestObserver<String> obs = engine.eval("{(new java.lang.String(\"Gravitee\"))}", String.class).test();
+        obs.assertResult("Gravitee");
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowConstructorsFromUnknownClasses() {
-        String expression = "{(new java.lang.Thread())}";
-        TemplateEngine engine = TemplateEngine.templateEngine();
-
-        engine.getValue(expression, String.class);
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        final TestObserver<Object> obs = engine.eval("{(new java.lang.Thread())}", Object.class).test();
+        obs.assertError(ExpressionEvaluationException.class);
     }
 
     @Test
@@ -544,51 +522,48 @@ public class SpelTemplateEngineTest {
             .withProperty(EL_WHITELIST_MODE_KEY, "append")
             .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "new java.lang.Exception java.lang.String");
 
-        SecuredResolver.initialize(environment);
-        String expression = "{(new java.lang.Exception(\"Gravitee\"))}";
-        TemplateEngine engine = TemplateEngine.templateEngine();
+        reinitSecuredResolver(environment);
 
-        assertEquals(new Exception("Gravitee").getMessage(), engine.getValue(expression, Exception.class).getMessage());
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        final TestObserver<Exception> obs = engine.eval("{(new java.lang.Exception(\"Gravitee\"))}", Exception.class).test();
+        obs.assertValue(e -> "Gravitee".equals(e.getMessage()));
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
-    public void shouldIgnoreConstructorsOthersThanWhitelisted() {
+    @Test
+    public void shouldNotAllowConstructorsOthersThanWhitelisted() {
         ConfigurableEnvironment environment = new MockEnvironment()
             .withProperty(EL_WHITELIST_MODE_KEY, "append")
             .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "new java.lang.Exception java.lang.String");
 
-        SecuredResolver.initialize(environment);
-        String expression = "{(new java.lang.Exception())}";
-        TemplateEngine engine = TemplateEngine.templateEngine();
+        reinitSecuredResolver(environment);
 
-        engine.getValue(expression, Exception.class);
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        final TestObserver<Exception> obs = engine.eval("{(new java.lang.Exception())}", Exception.class).test();
+        obs.assertError(ExpressionEvaluationException.class);
     }
 
     @Test
     public void shouldEvaluateSimpleContentWithNewline() {
-        String expression = "{\n  \"status\": \"OK\"\n}";
-        TemplateEngine engine = TemplateEngine.templateEngine();
-
-        String value = engine.getValue(expression, String.class);
-        assertEquals(value, expression);
+        final String expression = "{\n  \"status\": \"OK\"\n}";
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        final TestObserver<String> obs = engine.eval(expression, String.class).test();
+        obs.assertResult(expression);
     }
 
     @Test
     public void shouldEvaluateSimpleContentWithTab() {
         String expression = "{\t\"status\": \"OK\"  }";
-        TemplateEngine engine = TemplateEngine.templateEngine();
-
-        String value = engine.getValue(expression, String.class);
-        assertEquals(value, expression);
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        final TestObserver<String> obs = engine.eval(expression, String.class).test();
+        obs.assertResult(expression);
     }
 
     @Test
     public void shouldEvaluateSimpleContentWithSpace() {
         String expression = "{ \"status\": \"OK\"  }";
-        TemplateEngine engine = TemplateEngine.templateEngine();
-
-        String value = engine.getValue(expression, String.class);
-        assertEquals(value, expression);
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        final TestObserver<String> obs = engine.eval(expression, String.class).test();
+        obs.assertResult(expression);
     }
 
     @Test
@@ -597,37 +572,48 @@ public class SpelTemplateEngineTest {
         parameters.put("param", Collections.singletonList("myparam"));
 
         when(request.parameters()).thenReturn(parameters);
-        when(request.path()).thenReturn("/stores/99/products/123456");
 
-        TemplateEngine engine = TemplateEngine.templateEngine();
+        final TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        MultiValueMap<String, String> paramsValue = engine.getValue("{#request.params}", MultiValueMap.class);
-        assertEquals("myparam", engine.getValue("{#request.params['param']}", String.class));
-        assertEquals("myparam", engine.getValue("{#request.params.param}", String.class));
+        TestObserver<MultiValueMap> paramsObs = engine.eval("{#request.params}", MultiValueMap.class).test();
+
+        paramsObs.assertResult(parameters);
+
+        engine.eval("{#request.params['param']}", String.class).test().assertResult("myparam");
+        engine.eval("{#request.params.param}", String.class).test().assertResult("myparam");
 
         io.gravitee.gateway.api.Request req = Mockito.mock(io.gravitee.gateway.api.Request.class);
         Response res = Mockito.mock(Response.class);
         SimpleExecutionContext simpleExecutionContext = new SimpleExecutionContext(req, res);
         simpleExecutionContext.setAttribute("gravitee.attribute.api", "my-api-id");
         engine.getTemplateContext().setVariable("context", simpleExecutionContext);
-        assertEquals("my-api-id", engine.getValue("{#context.attributes['api']}", String.class));
-        assertEquals("my-api-id", engine.getValue("{#context.attributes.api}", String.class));
-        assertEquals(null, engine.getValue("{#context.attributes['application']}", String.class));
-        assertEquals(null, engine.getValue("{#context.attributes.application}", String.class));
+
+        engine.eval("{#context.attributes['api']}", String.class).test().assertResult("my-api-id");
+        engine.eval("{#context.attributes.api}", String.class).test().assertResult("my-api-id");
+        engine.eval("{#context.attributes['application']}", String.class).test().assertNoValues().assertComplete();
+        engine.eval("{#context.attributes.application}", String.class).test().assertNoValues().assertComplete();
     }
 
     @Test
     public void shouldEvaluateWithBrackets() {
-        TemplateEngine engine = TemplateEngine.templateEngine();
-        engine.getTemplateContext().setVariable("timestamp", 3);
-
-        assertFalse(engine.getValue("{ (#timestamp > 2) && (#timestamp < 2) }", Boolean.class));
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        final TestObserver<Boolean> obs = engine.eval("{ (#timestamp > 2) && (#timestamp < 2) }", Boolean.class).test();
+        obs.assertResult(false);
     }
 
     @Test
     public void shouldEvaluateBooleanWithoutBraces() {
-        TemplateEngine engine = TemplateEngine.templateEngine();
-        assertTrue(engine.getValue("true", Boolean.class));
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        final TestObserver<Boolean> obs = engine.eval("true", Boolean.class).test();
+        obs.assertResult(true);
+    }
+
+    private void reinitSecuredResolver(Environment environment) {
+        ReflectionTestUtils.setField(SecuredResolver.class, "INSTANCE", null);
+        SecuredResolver.initialize(environment);
+
+        ReflectionTestUtils.setField(SecuredMethodResolver.class, "securedResolver", SecuredResolver.getInstance());
+        ReflectionTestUtils.setField(SecuredContructorResolver.class, "securedResolver", SecuredResolver.getInstance());
     }
 }

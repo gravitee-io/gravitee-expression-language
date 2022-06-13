@@ -19,57 +19,51 @@ import io.gravitee.el.TemplateContext;
 import io.gravitee.el.TemplateEngine;
 import io.gravitee.el.exceptions.ExpressionEvaluationException;
 import io.gravitee.el.spel.context.SpelTemplateContext;
-import java.util.regex.Pattern;
+import io.reactivex.Maybe;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
-import org.springframework.expression.ParserContext;
-import org.springframework.expression.spel.SpelCompilerMode;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelParserConfiguration;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
+ * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
  * @author GraviteeSource Team
  */
 public class SpelTemplateEngine implements TemplateEngine {
 
-    private static final String EXPRESSION_REGEX = "\\{( *[^#T\\( ])";
-    private static final Pattern EXPRESSION_REGEX_PATTERN = Pattern.compile(EXPRESSION_REGEX);
-    private static final String EXPRESSION_REGEX_SUBSTITUTE = "{'{'}$1";
-    private static final ParserContext PARSER_CONTEXT = new TemplateParserContext();
-    private static final SpelExpressionParser EXPRESSION_PARSER = new SpelExpressionParser(
-        new SpelParserConfiguration(SpelCompilerMode.MIXED, null)
-    );
+    protected final SpelTemplateContext templateContext;
+    private final io.gravitee.el.spel.SpelExpressionParser spelExpressionParser;
 
-    private final SpelTemplateContext templateContext = new SpelTemplateContext();
-
-    @Override
-    public String convert(String expression) {
-        return getValue(expression, String.class);
-    }
-
-    private Expression parseExpression(String expression) {
-        return EXPRESSION_PARSER.parseExpression(
-            EXPRESSION_REGEX_PATTERN.matcher(expression).replaceAll(EXPRESSION_REGEX_SUBSTITUTE),
-            PARSER_CONTEXT
-        );
-    }
-
-    private <T> T getValue(Expression expression, Class<T> clazz) {
-        try {
-            return expression.getValue(templateContext.getContext(), clazz);
-        } catch (SpelEvaluationException spelEvaluationException) {
-            throw new ExpressionEvaluationException(expression.getExpressionString(), spelEvaluationException);
-        }
+    public SpelTemplateEngine(io.gravitee.el.spel.SpelExpressionParser spelExpressionParser) {
+        this.spelExpressionParser = spelExpressionParser;
+        this.templateContext = new SpelTemplateContext();
     }
 
     @Override
     public <T> T getValue(String expression, Class<T> clazz) {
-        return getValue(parseExpression(expression), clazz);
+        return eval(spelExpressionParser.parseExpression(expression), templateContext.getContext(), clazz);
+    }
+
+    @Override
+    public <T> Maybe<T> eval(String expression, Class<T> clazz) {
+        final CachedExpression exp = spelExpressionParser.parseAndCacheExpression(expression);
+        return templateContext.evaluationContext(exp).flatMapMaybe(evaluationContext -> eval(exp, evaluationContext, clazz));
     }
 
     @Override
     public TemplateContext getTemplateContext() {
         return templateContext;
+    }
+
+    protected <T> Maybe<T> eval(CachedExpression exp, EvaluationContext evaluationContext, Class<T> clazz) {
+        return Maybe.fromCallable(() -> eval(exp.getExpression(), evaluationContext, clazz));
+    }
+
+    protected <T> T eval(Expression expression, EvaluationContext evaluationContext, Class<T> clazz) {
+        try {
+            return expression.getValue(evaluationContext, clazz);
+        } catch (SpelEvaluationException spelEvaluationException) {
+            throw new ExpressionEvaluationException(expression.getExpressionString(), spelEvaluationException);
+        }
     }
 }

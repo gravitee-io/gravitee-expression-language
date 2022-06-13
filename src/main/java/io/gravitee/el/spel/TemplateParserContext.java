@@ -15,6 +15,7 @@
  */
 package io.gravitee.el.spel;
 
+import io.reactivex.annotations.NonNull;
 import org.springframework.expression.ParserContext;
 
 /**
@@ -23,14 +24,24 @@ import org.springframework.expression.ParserContext;
  */
 public class TemplateParserContext implements ParserContext {
 
-    @Override
-    public String getExpressionPrefix() {
-        return "{";
+    private final String prefix;
+    private final String suffix;
+
+    public TemplateParserContext(String prefix, String suffix) {
+        this.prefix = prefix;
+        this.suffix = suffix;
     }
 
+    @NonNull
+    @Override
+    public String getExpressionPrefix() {
+        return prefix;
+    }
+
+    @NonNull
     @Override
     public String getExpressionSuffix() {
-        return "}";
+        return suffix;
     }
 
     @Override

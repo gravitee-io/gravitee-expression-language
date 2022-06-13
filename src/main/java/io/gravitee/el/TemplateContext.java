@@ -15,6 +15,10 @@
  */
 package io.gravitee.el;
 
+import io.reactivex.Completable;
+import io.reactivex.Maybe;
+import io.reactivex.Single;
+
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
@@ -26,6 +30,31 @@ public interface TemplateContext {
      * @param value value to be placed in the variable
      */
     void setVariable(String name, Object value);
+
+    /**
+     * Set a deferred variable that will be triggered on demand before evaluating any el expression and if the expression requires access to the specified variable.
+     * If the expression evaluated against this template context does not access the <code>name</code> variable, then the deferred variable will not be invoked.
+     *
+     * Specifying a {@link Completable} allows to define any custom action like populating attributes of an object added to the context (ex: request.content).
+     *  @param name the name of the variable.
+     * @param deferred a {@link Completable} that will be called if and only if the variable <code>name</code> is accessed by the evaluated expression.
+     */
+    void setDeferredVariable(String name, Completable deferred);
+
+    /**
+     * Same as {@link #setDeferredVariable(String, Completable)} but with a {@link Maybe}.
+     * The value of the {@link Maybe} will be added to the context variable under the variable <code>name</code>.
+     *  @param name the name of the variable.
+     * @param deferred a {@link Maybe} that will be called if and only if the variable <code>name</code> is accessed by the evaluated expression.
+     */
+    void setDeferredVariable(String name, Maybe<?> deferred);
+
+    /**
+     * Same as {@link #setDeferredVariable(String, Maybe)} but with a {@link Single}.
+     *  @param name the name of the variable.
+     * @param deferred a {@link Single} that will be called if and only if the variable <code>name</code> is accessed by the evaluated expression.
+     */
+    void setDeferredVariable(String name, Single<?> deferred);
 
     /**
      * Look up a named variable within this evaluation context.

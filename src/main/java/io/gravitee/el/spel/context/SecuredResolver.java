@@ -60,7 +60,7 @@ public class SecuredResolver {
     private static SecuredResolver INSTANCE;
     private static final Map<Class<?>, Method[]> methodsByType = new ConcurrentHashMap<>();
     private static final Map<Class<?>, Method[]> methodsByTypeAndSuperTypes = new ConcurrentHashMap<>();
-    private static final Set<Constructor> allConstructors = ConcurrentHashMap.newKeySet();
+    private static final Set<Constructor<?>> allConstructors = ConcurrentHashMap.newKeySet();
 
     /**
      * Initialize the method resolver loading all whitelisted methods from environment configuration and / or built-in whitelist.
@@ -201,7 +201,7 @@ public class SecuredResolver {
         return Arrays.asList(clazz.getDeclaredMethods());
     }
 
-    private static Constructor parseConstructor(String declaration) throws Exception {
+    private static Constructor<?> parseConstructor(String declaration) throws Exception {
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         String[] methodArgs = {};

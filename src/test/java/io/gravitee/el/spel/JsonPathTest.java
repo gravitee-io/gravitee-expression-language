@@ -19,10 +19,8 @@ import io.gravitee.el.spel.function.json.JsonPathFunction;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Assert;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -35,11 +33,11 @@ public class JsonPathTest {
         Map<String, String> context1 = new HashMap<>();
         context1.put("key", "first");
         Object value = JsonPathFunction.evaluate(context1, "concat(\"/\", $.key)");
-        Assert.assertEquals("/first", value);
+        Assertions.assertEquals("/first", value);
 
         Map<String, String> context2 = new HashMap<>();
         context2.put("key", "second");
         value = JsonPathFunction.evaluate(context2, "concat(\"/\", $.key)");
-        Assert.assertEquals("/second", value);
+        Assertions.assertEquals("/second", value);
     }
 }
