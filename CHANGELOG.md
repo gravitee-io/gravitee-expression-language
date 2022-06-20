@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/gravitee-io/gravitee-expression-language/compare/1.9.2...1.10.0) (2022-06-20)
+
+
+### Features
+
+* **jupiter:** reactive EL evaluation ([05156e5](https://github.com/gravitee-io/gravitee-expression-language/commit/05156e56e8d367e4e7277605d83912d6b2a13430))
+
 ## [1.9.2](https://github.com/gravitee-io/gravitee-expression-language/compare/1.9.1...1.9.2) (2022-04-05)
 
 
