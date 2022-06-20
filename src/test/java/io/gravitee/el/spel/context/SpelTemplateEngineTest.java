@@ -40,6 +40,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.expression.ParseException;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -615,5 +616,12 @@ public class SpelTemplateEngineTest {
 
         ReflectionTestUtils.setField(SecuredMethodResolver.class, "securedResolver", SecuredResolver.getInstance());
         ReflectionTestUtils.setField(SecuredContructorResolver.class, "securedResolver", SecuredResolver.getInstance());
+    }
+
+    @Test
+    public void shouldThrowParsingExceptionWithWrongExpression() {
+        String wrongExpression = "{#";
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.eval(wrongExpression, Boolean.class).test().assertFailure(ParseException.class);
     }
 }

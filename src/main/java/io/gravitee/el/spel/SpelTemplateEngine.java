@@ -46,8 +46,14 @@ public class SpelTemplateEngine implements TemplateEngine {
 
     @Override
     public <T> Maybe<T> eval(String expression, Class<T> clazz) {
-        final CachedExpression exp = spelExpressionParser.parseAndCacheExpression(expression);
-        return templateContext.evaluationContext(exp).flatMapMaybe(evaluationContext -> eval(exp, evaluationContext, clazz));
+        try {
+            CachedExpression cachedExpression = spelExpressionParser.parseAndCacheExpression(expression);
+            return templateContext
+                .evaluationContext(cachedExpression)
+                .flatMapMaybe(evaluationContext -> eval(cachedExpression, evaluationContext, clazz));
+        } catch (Exception e) {
+            return Maybe.error(e);
+        }
     }
 
     @Override
