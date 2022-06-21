@@ -1,3 +1,10 @@
+## [1.10.1](https://github.com/gravitee-io/gravitee-expression-language/compare/1.10.0...1.10.1) (2022-06-21)
+
+
+### Bug Fixes
+
+* **spel:** catch parsing exception and return Maybe on error ([5d74a94](https://github.com/gravitee-io/gravitee-expression-language/commit/5d74a94b3fb3f749147b62446f00ea46a6224f6a))
+
 # [1.10.0](https://github.com/gravitee-io/gravitee-expression-language/compare/1.9.2...1.10.0) (2022-06-20)
 
 
