@@ -23,6 +23,7 @@ class java.text.MessageFormat
 class java.util.Calendar
 
 class io.gravitee.gateway.api.el.EvaluableSSLPrincipal
+class io.gravitee.gateway.api.http.HttpHeaders
 
 # Allows by method signatures
 method java.lang.Object equals java.lang.Object
@@ -73,5 +74,7 @@ method java.util.Random nextInt int
 method java.util.Random nextLong
 method java.util.TimeZone getTimeZone java.lang.String
 method java.util.UUID randomUUID
+method io.gravitee.common.util.MultiValueMap toSingleValueMap
+method io.gravitee.common.util.MultiValueMap getFirst java.lang.Object
 
 # Allows by constructor signatures

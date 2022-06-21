@@ -32,6 +32,7 @@ import io.gravitee.el.spel.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.context.SimpleExecutionContext;
 import io.gravitee.gateway.api.http.HttpHeaders;
+import java.sql.Array;
 import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -629,5 +630,40 @@ public class SpelTemplateEngineTest {
     public void shouldEvaluateBooleanWithoutBraces() {
         TemplateEngine engine = TemplateEngine.templateEngine();
         assertTrue(engine.getValue("true", Boolean.class));
+    }
+
+    @Test
+    public void shouldGetFirstHeader() {
+        final List<CharSequence> values = new ArrayList<>();
+        values.add("my_api_host");
+        values.add("value2");
+        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", values);
+
+        when(request.headers()).thenReturn(headers);
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        String value = engine.convert("{ #request.headers.getFirst('X-Gravitee-Endpoint') }");
+        assertEquals("my_api_host", value);
+    }
+
+    @Test
+    public void shouldConvertToSingleValueMap() {
+        final List<CharSequence> values = new ArrayList<>();
+        values.add("my_api_host");
+        values.add("value2");
+        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", values).add("X-Gravitee-Other", "value");
+
+        when(request.headers()).thenReturn(headers);
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        LinkedHashMap<String, String> result = engine.getValue("{ #request.headers.toSingleValueMap() }", LinkedHashMap.class);
+        assertTrue(result.containsKey("X-Gravitee-Endpoint"));
+        assertEquals("my_api_host", result.get("X-Gravitee-Endpoint"));
+        assertTrue(result.containsKey("X-Gravitee-Other"));
+        assertEquals("value", result.get("X-Gravitee-Other"));
     }
 }
