@@ -28,7 +28,7 @@ import org.springframework.expression.TypedValue;
  */
 public class HttpHeadersPropertyAccessor implements PropertyAccessor {
 
-    private final Class<?>[] TARGET_CLASSES = new Class[] { HttpHeaders.class };
+    private static final Class<?>[] TARGET_CLASSES = new Class[] { HttpHeaders.class };
 
     @Override
     public Class<?>[] getSpecificTargetClasses() {
@@ -37,7 +37,7 @@ public class HttpHeadersPropertyAccessor implements PropertyAccessor {
 
     @Override
     public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-        return true;
+        return target instanceof HttpHeaders;
     }
 
     @Override
