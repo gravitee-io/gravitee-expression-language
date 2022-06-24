@@ -1,3 +1,10 @@
+## [1.9.3](https://github.com/gravitee-io/gravitee-expression-language/compare/1.9.2...1.9.3) (2022-06-24)
+
+
+### Bug Fixes
+
+* restore HTTP headers backward compatibility ([5d8fdb7](https://github.com/gravitee-io/gravitee-expression-language/commit/5d8fdb7c87d5c98322a1aef4a7e83ea7368a8c07))
+
 ## [1.9.2](https://github.com/gravitee-io/gravitee-expression-language/compare/1.9.1...1.9.2) (2022-04-05)
 
 
