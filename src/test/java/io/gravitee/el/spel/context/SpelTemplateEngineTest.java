@@ -666,4 +666,30 @@ public class SpelTemplateEngineTest {
         assertTrue(result.containsKey("X-Gravitee-Other"));
         assertEquals("value", result.get("X-Gravitee-Other"));
     }
+
+    @Test
+    public void shouldGetValueAsBoolean() {
+        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "true");
+
+        when(request.headers()).thenReturn(headers);
+        when(request.path()).thenReturn("/stores/99/products/123456");
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        assertTrue(engine.getValue("{#request.headers['X-Gravitee-Endpoint'] != null}", Boolean.class));
+        assertTrue(
+            engine.getValue(
+                "{#request.headers['X-Gravitee-Endpoint'] != null && #request.headers['X-Gravitee-Endpoint'][0] == \"true\"}",
+                Boolean.class
+            )
+        );
+        assertFalse(
+            engine.getValue(
+                "{#request.headers['X-Gravitee-Endpoint'] != null && #request.headers['X-Gravitee-Endpoint'][0] == \"false\"}",
+                Boolean.class
+            )
+        );
+        assertFalse(engine.getValue("{#request.headers['X-Gravitee-No-Present'] != null}", Boolean.class));
+    }
 }
