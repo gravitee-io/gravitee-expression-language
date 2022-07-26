@@ -1,3 +1,10 @@
+## [1.9.4](https://github.com/gravitee-io/gravitee-expression-language/compare/1.9.3...1.9.4) (2022-07-26)
+
+
+### Bug Fixes
+
+* add test for getValue as Boolean and bump gravitee-gateway-api ([ba75187](https://github.com/gravitee-io/gravitee-expression-language/commit/ba751872355abaabf002c9e70bb321a2004711c2))
+
 ## [1.9.3](https://github.com/gravitee-io/gravitee-expression-language/compare/1.9.2...1.9.3) (2022-06-24)
 
 
