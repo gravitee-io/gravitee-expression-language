@@ -32,8 +32,9 @@ import io.gravitee.el.spel.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.context.SimpleExecutionContext;
 import io.gravitee.gateway.api.http.HttpHeaders;
-import java.sql.Array;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -691,5 +692,37 @@ public class SpelTemplateEngineTest {
             )
         );
         assertFalse(engine.getValue("{#request.headers['X-Gravitee-No-Present'] != null}", Boolean.class));
+    }
+
+    @Test
+    public void shouldEvaluateSimpleRegex() {
+        String pathInfo = "/user";
+        String regex = "^\\/user";
+
+        Pattern pattern = java.util.regex.Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(pathInfo);
+        assertEquals(true, matcher.matches());
+
+        when(request.pathInfo()).thenReturn(pathInfo);
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        assertTrue(engine.getValue("{#request.pathInfo.matches('" + regex + "')}", Boolean.class));
+    }
+
+    @Test
+    public void shouldEvaluateRegexWithQuantifiers() {
+        String pathInfo = "/user/01234567-abcd-abcd-abcd-012345678912/file";
+        String regex = "^\\/user\\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(\\/file)?$";
+
+        Pattern pattern = java.util.regex.Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(pathInfo);
+        assertEquals(true, matcher.matches());
+
+        when(request.pathInfo()).thenReturn(pathInfo);
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        assertTrue(engine.getValue("{#request.pathInfo.matches('" + regex + "')}", Boolean.class));
     }
 }

@@ -49,4 +49,8 @@ public class EvaluableRequest {
     public String getContent() {
         return null;
     }
+
+    public String getPathInfo() {
+        return request.pathInfo();
+    }
 }
