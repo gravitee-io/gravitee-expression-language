@@ -73,5 +73,17 @@ method java.util.Random nextInt int
 method java.util.Random nextLong
 method java.util.TimeZone getTimeZone java.lang.String
 method java.util.UUID randomUUID
+method io.gravitee.common.util.MultiValueMap toSingleValueMap
+method io.gravitee.common.util.MultiValueMap getFirst java.lang.Object
+method io.gravitee.gateway.api.http.HttpHeaders getFirst java.lang.CharSequence
+method io.gravitee.gateway.api.http.HttpHeaders get java.lang.CharSequence
+method io.gravitee.gateway.api.http.HttpHeaders getAll java.lang.CharSequence
+method io.gravitee.gateway.api.http.HttpHeaders containsKey java.lang.CharSequence
+method io.gravitee.gateway.api.http.HttpHeaders contains java.lang.CharSequence
+method io.gravitee.gateway.api.http.HttpHeaders names
+method io.gravitee.gateway.api.http.HttpHeaders size
+method io.gravitee.gateway.api.http.HttpHeaders isEmpty
+method io.gravitee.gateway.api.http.HttpHeaders toSingleValueMap
+
 
 # Allows by constructor signatures
