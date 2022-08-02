@@ -1,3 +1,10 @@
+## [1.9.5](https://github.com/gravitee-io/gravitee-expression-language/compare/1.9.4...1.9.5) (2022-08-02)
+
+
+### Bug Fixes
+
+* resolve regex with quantifiers ([4881366](https://github.com/gravitee-io/gravitee-expression-language/commit/488136606d33ce0feb0845f9401660443b3b572f)), closes [gravitee-io/issues#8217](https://github.com/gravitee-io/issues/issues/8217)
+
 ## [1.9.4](https://github.com/gravitee-io/gravitee-expression-language/compare/1.9.3...1.9.4) (2022-07-26)
 
 
