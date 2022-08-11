@@ -22,7 +22,7 @@
 
     <groupId>io.gravitee.el</groupId>
     <artifactId>gravitee-expression-language</artifactId>
-    <version>1.10.1</version>
+    <version>1.10.1-feat-endpoint-invoker-SNAPSHOT</version>
 
     <name>Gravitee.io Common - Expression language module</name>
     <description>Gravitee.io Common - Expression language module</description>
@@ -37,7 +37,7 @@
         <gravitee-bom.version>2.5</gravitee-bom.version>
         <json-path.version>2.6.0</json-path.version>
         <gravitee-common.version>1.27.0</gravitee-common.version>
-        <gravitee-gateway-api.version>1.34.0</gravitee-gateway-api.version>
+        <gravitee-gateway-api.version>1.38.0</gravitee-gateway-api.version>
         <jmh.version>1.35</jmh.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
         <gravitee-node.version>1.24.1</gravitee-node.version>
