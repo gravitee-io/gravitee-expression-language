@@ -17,7 +17,7 @@ package io.gravitee.el.spel.context;
 
 import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_LIST_KEY;
 import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_MODE_KEY;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,12 +32,23 @@ import io.gravitee.el.spel.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.context.SimpleExecutionContext;
 import io.gravitee.gateway.api.http.HttpHeaders;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -57,7 +68,7 @@ public class SpelTemplateEngineTest {
     @Mock
     protected Request request;
 
-    @Before
+    @BeforeEach
     public void init() {
         initMocks(this);
         SecuredResolver.initialize(null);
@@ -342,7 +353,7 @@ public class SpelTemplateEngineTest {
 
         content = "{#jsonPath(#request.content, '$.something')}";
         value = engine.convert(content);
-        Assert.assertNull(value);
+        assertNull(value);
     }
 
     @Test
@@ -370,7 +381,7 @@ public class SpelTemplateEngineTest {
 
         String content = "{#jsonPath(#profile, '$.identity_provider_id') == 'idp_6'}";
         boolean result = engine.getValue(content, boolean.class);
-        Assert.assertFalse(result);
+        assertFalse(result);
 
         content = "{#jsonPath(#profile, '$.lastname') == 'DOE'}";
         result = engine.getValue(content, boolean.class);
@@ -378,7 +389,7 @@ public class SpelTemplateEngineTest {
 
         content = "{#jsonPath(#profile, '$.lastname') == 'DONE'}";
         result = engine.getValue(content, boolean.class);
-        Assert.assertFalse(result);
+        assertFalse(result);
     }
 
     @Test
@@ -401,23 +412,23 @@ public class SpelTemplateEngineTest {
 
         content = "{#jsonPath(#profile, '$.groups').contains('Group4')}";
         result = engine.getValue(content, boolean.class);
-        Assert.assertFalse(result);
+        assertFalse(result);
 
         content = "{#jsonPath(#profile, '$.emptiness').contains('Group4')}";
         result = engine.getValue(content, boolean.class);
-        Assert.assertFalse(result);
+        assertFalse(result);
 
         content = "{#jsonPath(#profile, '$.nothingness')?.contains('Group4')?:false}";
         result = engine.getValue(content, boolean.class);
-        Assert.assertFalse(result);
+        assertFalse(result);
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowedClassMethod() {
         String expression = "{T(java.lang.Class).forName('java.lang.Math')}";
         TemplateEngine engine = TemplateEngine.templateEngine();
 
-        engine.getValue(expression, Object.class);
+        assertThrows(ExpressionEvaluationException.class, () -> engine.getValue(expression, Object.class));
     }
 
     @Test
@@ -428,44 +439,50 @@ public class SpelTemplateEngineTest {
         assertEquals((Integer) 60, engine.getValue(expression, Integer.class));
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowAddParam() {
         when(request.parameters()).thenReturn(new LinkedMultiValueMap<>());
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        engine.getValue("{#request.params.add('test', 'test')}", String.class);
+        assertThrows(ExpressionEvaluationException.class, () -> engine.getValue("{#request.params.add('test', 'test')}", String.class));
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowRemoveParam() {
         when(request.parameters()).thenReturn(new LinkedMultiValueMap<>());
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        engine.getValue("{#request.params.remove('test')}", String.class);
+        assertThrows(ExpressionEvaluationException.class, () -> engine.getValue("{#request.params.remove('test')}", String.class));
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowToAddHeader() {
         when(request.headers()).thenReturn(HttpHeaders.create());
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        engine.getValue("{#request.headers.add('X-Gravitee-Endpoint', 'test')}", String.class);
+        assertThrows(
+            ExpressionEvaluationException.class,
+            () -> engine.getValue("{#request.headers.add('X-Gravitee-Endpoint', 'test')}", String.class)
+        );
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowToRemoveHeader() {
         when(request.headers()).thenReturn(HttpHeaders.create());
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        engine.getValue("{#request.headers.remove('X-Gravitee-Endpoint')}", String.class);
+        assertThrows(
+            ExpressionEvaluationException.class,
+            () -> engine.getValue("{#request.headers.remove('X-Gravitee-Endpoint')}", String.class)
+        );
     }
 
     @Test
@@ -495,7 +512,7 @@ public class SpelTemplateEngineTest {
         assertEquals(System.getenv(), engine.getValue("{(T(java.lang.System)).getenv()}", Map.class));
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowMethodWhenBuiltInWhitelistNotLoaded() {
         ConfigurableEnvironment environment = new MockEnvironment()
             .withProperty(EL_WHITELIST_MODE_KEY, "replace") // The configured whitelist replaces the built-in (doesn't contains Math.abs(int) method).
@@ -506,7 +523,7 @@ public class SpelTemplateEngineTest {
         String expression = "{T(java.lang.Math).abs(60)}";
         TemplateEngine engine = TemplateEngine.templateEngine();
 
-        engine.getValue(expression, Object.class);
+        assertThrows(ExpressionEvaluationException.class, () -> engine.getValue(expression, Object.class));
     }
 
     @Test
@@ -532,12 +549,12 @@ public class SpelTemplateEngineTest {
         assertEquals("Gravitee", engine.getValue(expression, String.class));
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldNotAllowConstructorsFromUnknownClasses() {
         String expression = "{(new java.lang.Thread())}";
         TemplateEngine engine = TemplateEngine.templateEngine();
 
-        engine.getValue(expression, String.class);
+        assertThrows(ExpressionEvaluationException.class, () -> engine.getValue(expression, String.class));
     }
 
     @Test
@@ -553,7 +570,7 @@ public class SpelTemplateEngineTest {
         assertEquals(new Exception("Gravitee").getMessage(), engine.getValue(expression, Exception.class).getMessage());
     }
 
-    @Test(expected = ExpressionEvaluationException.class)
+    @Test
     public void shouldIgnoreConstructorsOthersThanWhitelisted() {
         ConfigurableEnvironment environment = new MockEnvironment()
             .withProperty(EL_WHITELIST_MODE_KEY, "append")
@@ -563,34 +580,7 @@ public class SpelTemplateEngineTest {
         String expression = "{(new java.lang.Exception())}";
         TemplateEngine engine = TemplateEngine.templateEngine();
 
-        engine.getValue(expression, Exception.class);
-    }
-
-    @Test
-    public void shouldEvaluateSimpleContentWithNewline() {
-        String expression = "{\n  \"status\": \"OK\"\n}";
-        TemplateEngine engine = TemplateEngine.templateEngine();
-
-        String value = engine.getValue(expression, String.class);
-        assertEquals(value, expression);
-    }
-
-    @Test
-    public void shouldEvaluateSimpleContentWithTab() {
-        String expression = "{\t\"status\": \"OK\"  }";
-        TemplateEngine engine = TemplateEngine.templateEngine();
-
-        String value = engine.getValue(expression, String.class);
-        assertEquals(value, expression);
-    }
-
-    @Test
-    public void shouldEvaluateSimpleContentWithSpace() {
-        String expression = "{ \"status\": \"OK\"  }";
-        TemplateEngine engine = TemplateEngine.templateEngine();
-
-        String value = engine.getValue(expression, String.class);
-        assertEquals(value, expression);
+        assertThrows(ExpressionEvaluationException.class, () -> engine.getValue(expression, Exception.class));
     }
 
     @Test
@@ -724,5 +714,69 @@ public class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
         assertTrue(engine.getValue("{#request.pathInfo.matches('" + regex + "')}", Boolean.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = {
+            "/api/[0-9]{2}/(.*)",
+            "/api/[0-9]{217}/(.*)",
+            "{",
+            "{\n  \"status\": \"OK\"\n}",
+            "{\t\"status\": \"OK\"  }",
+            "{ \"status\": \"OK\"  }",
+            "{ \"status\": \"{2}\"  }",
+            "{ \"status\": \"'{2}'\"  }",
+        }
+    )
+    public void shouldEvaluateSimpleStringWithoutExpressions(String expression) {
+        final String evaluatedExpression = TemplateEngine.templateEngine().getValue(expression, String.class);
+        assertEquals(expression, evaluatedExpression);
+    }
+
+    private static Stream<Arguments> expressionsWithoutVariables() {
+        return Stream.of(
+            Arguments.of("{2} {('abc'.matches('[0-9]{2}'))} {3}", "{2} false {3}"),
+            Arguments.of("{2} {a} {('78'.matches('[0-9]{2}'))} {3}", "{2} {a} true {3}"),
+            Arguments.of("{2} {('718'.matches('[0-9]{2}'))} {3}", "{2} false {3}"),
+            Arguments.of("{T(java.lang.String).format(\"%scd\", \"ab\")}", "abcd"),
+            Arguments.of("{T(java.lang.String).format(\"%scd\", \"{2}\")}", "{2}cd"),
+            Arguments.of("{  T ( java.lang.String ).format(\"%scd\", \"ab\")}", "abcd"),
+            Arguments.of("{ T ( java.lang.String ).format(\"%scd\", \"{2}\")}", "{2}cd"),
+            Arguments.of("{1 == 1}", "{1 == 1}"),
+            Arguments.of("{(1 == 1)}", "true"),
+            Arguments.of("{(12 == 1)}", "false")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("expressionsWithoutVariables")
+    public void shouldEvaluateStringWithExpression(String expression, String expectedResult) {
+        final String evaluatedExpression = TemplateEngine.templateEngine().getValue(expression, String.class);
+        assertEquals(expectedResult, evaluatedExpression);
+    }
+
+    private static Stream<Arguments> expressionsWithVariables() {
+        return Stream.of(
+            Arguments.of("{2} {#request.pathInfo.matches('[0-9]{2}')} {3}", "{2} false {3}"),
+            Arguments.of("{2} {#request.pathInfo.matches('/my/path/[A-Z]{1}[0-9]{2}')} {3}", "{2} true {3}"),
+            Arguments.of("{2} {#request.pathInfo.matches('/my/path/[A-Z]{2}[0-9]{2}')} {3}", "{2} false {3}"),
+            Arguments.of("{2} {  #  request.pathInfo.matches ( '/my/path/[A-Z]{1}[0-9]{2}')} {3}", "{2} true {3}"),
+            Arguments.of("{2} {  #  request.pathInfo.matches ( '/my/path/[A-Z]{2}[0-9]{2}')} {3}", "{2} false {3}"),
+            Arguments.of("{ '/my/path/A58' == #request.pathInfo}", "{ '/my/path/A58' == #request.pathInfo}"),
+            Arguments.of("{('/my/path/A58'==#request.pathInfo)}", "true"),
+            Arguments.of("{('/my/path/A59'==#request.pathInfo)}", "false")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("expressionsWithVariables")
+    public void shouldEvaluateStringWithExpressionContainingVariables(String expression, String expectedResult) {
+        when(request.pathInfo()).thenReturn("/my/path/A58");
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        final String evaluatedExpression = engine.getValue(expression, String.class);
+        assertEquals(expectedResult, evaluatedExpression);
     }
 }

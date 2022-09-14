@@ -25,7 +25,7 @@ public class TemplateParserContext implements ParserContext {
 
     @Override
     public String getExpressionPrefix() {
-        return "{";
+        return "{#";
     }
 
     @Override
