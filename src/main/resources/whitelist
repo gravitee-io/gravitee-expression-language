@@ -76,5 +76,6 @@ method java.util.TimeZone getTimeZone java.lang.String
 method java.util.UUID randomUUID
 method io.gravitee.common.util.MultiValueMap toSingleValueMap
 method io.gravitee.common.util.MultiValueMap getFirst java.lang.Object
+method io.gravitee.common.util.MultiValueMap containsAllKeys java.util.Collection
 
 # Allows by constructor signatures
