@@ -659,6 +659,18 @@ public class SpelTemplateEngineTest {
     }
 
     @Test
+    public void shouldHeadersContainsAllKeys() {
+        final HttpHeaders headers = HttpHeaders.create().add("Header1", "value1").add("Header2", "value2");
+        when(request.headers()).thenReturn(headers);
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        assertTrue(engine.getValue("{ #request.headers.containsAllKeys({'Header1', 'Header2'}) }", Boolean.class));
+        assertFalse(engine.getValue("{ #request.headers.containsAllKeys({'Header1', 'Header2', 'Header3'}) }", Boolean.class));
+    }
+
+    @Test
     public void shouldGetValueAsBoolean() {
         final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "true");
 
