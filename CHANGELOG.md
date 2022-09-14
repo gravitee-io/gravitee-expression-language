@@ -1,3 +1,11 @@
+## [1.9.6](https://github.com/gravitee-io/gravitee-expression-language/compare/1.9.5...1.9.6) (2022-09-14)
+
+
+### Bug Fixes
+
+* allow usage of MultiValueMap.containsAllKeys ([77c64a7](https://github.com/gravitee-io/gravitee-expression-language/commit/77c64a7d27a80176039f896d57aea450761563ab))
+* properly handle brackets in evaluated expressions ([80cc2ae](https://github.com/gravitee-io/gravitee-expression-language/commit/80cc2ae9764edaf9c6011f8ff25547011942791a))
+
 ## [1.9.5](https://github.com/gravitee-io/gravitee-expression-language/compare/1.9.4...1.9.5) (2022-08-02)
 
 
