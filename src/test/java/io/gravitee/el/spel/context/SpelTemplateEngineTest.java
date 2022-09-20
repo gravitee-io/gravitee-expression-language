@@ -624,4 +624,68 @@ public class SpelTemplateEngineTest {
         final TemplateEngine engine = TemplateEngine.templateEngine();
         engine.eval(wrongExpression, Boolean.class).test().assertFailure(ParseException.class);
     }
+
+    @Test
+    public void shouldGetFirstHeader() {
+        final List<CharSequence> values = new ArrayList<>();
+        values.add("my_api_host");
+        values.add("value2");
+        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", values);
+
+        when(request.headers()).thenReturn(headers);
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        final TestObserver<String> obs = engine.eval("{ #request.headers.getFirst('X-Gravitee-Endpoint') }", String.class).test();
+        obs.assertValue("my_api_host");
+    }
+
+    @Test
+    public void shouldConvertToSingleValueMap() {
+        final List<CharSequence> values = new ArrayList<>();
+        values.add("my_api_host");
+        values.add("value2");
+        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", values).add("X-Gravitee-Other", "value");
+
+        when(request.headers()).thenReturn(headers);
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        TestObserver<LinkedHashMap> result = engine.eval("{ #request.headers.toSingleValueMap() }", LinkedHashMap.class).test();
+        result.assertValue(v ->
+            v.containsKey("X-Gravitee-Endpoint") &&
+            v.get("X-Gravitee-Endpoint").equals("my_api_host") &&
+            v.containsKey("X-Gravitee-Other") &&
+            v.get("X-Gravitee-Other").equals("value")
+        );
+    }
+
+    @Test
+    public void shouldGetValueAsBoolean() {
+        final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "true");
+
+        when(request.headers()).thenReturn(headers);
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        engine.eval("{#request.headers['X-Gravitee-Endpoint'] != null}", Boolean.class).test().assertValue(true);
+        engine
+            .eval(
+                "{#request.headers['X-Gravitee-Endpoint'] != null && #request.headers['X-Gravitee-Endpoint'][0] == \"true\"}",
+                Boolean.class
+            )
+            .test()
+            .assertValue(true);
+        engine
+            .eval(
+                "{#request.headers['X-Gravitee-Endpoint'] != null && #request.headers['X-Gravitee-Endpoint'][0] == \"false\"}",
+                Boolean.class
+            )
+            .test()
+            .assertValue(false);
+        engine.eval("{#request.headers['X-Gravitee-No-Present'] != null}", Boolean.class).test().assertValue(false);
+    }
 }
