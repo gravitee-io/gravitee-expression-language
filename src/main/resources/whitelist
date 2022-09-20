@@ -85,5 +85,6 @@ method io.gravitee.gateway.api.http.HttpHeaders size
 method io.gravitee.gateway.api.http.HttpHeaders isEmpty
 method io.gravitee.gateway.api.http.HttpHeaders toSingleValueMap
 
+method io.gravitee.common.util.MultiValueMap containsAllKeys java.util.Collection
 
 # Allows by constructor signatures

@@ -17,7 +17,11 @@ package io.gravitee.el.spel.context;
 
 import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_LIST_KEY;
 import static io.gravitee.el.spel.context.SecuredMethodResolver.EL_WHITELIST_MODE_KEY;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -32,9 +36,16 @@ import io.gravitee.gateway.api.context.SimpleExecutionContext;
 import io.gravitee.gateway.api.http.HttpHeaders;
 import io.reactivex.observers.TestObserver;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -663,6 +674,18 @@ public class SpelTemplateEngineTest {
     }
 
     @Test
+    public void shouldHeadersContainsAllKeys() {
+        final HttpHeaders headers = HttpHeaders.create().add("Header1", "value1").add("Header2", "value2");
+        when(request.headers()).thenReturn(headers);
+
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        assertTrue(engine.getValue("{ #request.headers.containsAllKeys({'Header1', 'Header2'}) }", Boolean.class));
+        assertFalse(engine.getValue("{ #request.headers.containsAllKeys({'Header1', 'Header2', 'Header3'}) }", Boolean.class));
+    }
+
+    @Test
     public void shouldGetValueAsBoolean() {
         final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "true");
 
@@ -687,5 +710,101 @@ public class SpelTemplateEngineTest {
             .test()
             .assertValue(false);
         engine.eval("{#request.headers['X-Gravitee-No-Present'] != null}", Boolean.class).test().assertValue(false);
+    }
+
+    @Test
+    void shouldEvaluateSimpleRegex() {
+        String pathInfo = "/user";
+        String regex = "^\\/user";
+
+        Pattern pattern = java.util.regex.Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(pathInfo);
+        assertTrue(matcher.matches());
+
+        when(request.pathInfo()).thenReturn(pathInfo);
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        assertTrue(engine.getValue("{#request.pathInfo.matches('" + regex + "')}", Boolean.class));
+    }
+
+    @Test
+    void shouldEvaluateRegexWithQuantifiers() {
+        String pathInfo = "/user/01234567-abcd-abcd-abcd-012345678912/file";
+        String regex = "^\\/user\\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(\\/file)?$";
+
+        Pattern pattern = java.util.regex.Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(pathInfo);
+        assertTrue(matcher.matches());
+
+        when(request.pathInfo()).thenReturn(pathInfo);
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        assertTrue(engine.getValue("{#request.pathInfo.matches('" + regex + "')}", Boolean.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = {
+            "/api/[0-9]{2}/(.*)",
+            "/api/[0-9]{217}/(.*)",
+            "{",
+            "{\n  \"status\": \"OK\"\n}",
+            "{\t\"status\": \"OK\"  }",
+            "{ \"status\": \"OK\"  }",
+            "{ \"status\": \"{2}\"  }",
+            "{ \"status\": \"'{2}'\"  }",
+        }
+    )
+    void shouldEvaluateSimpleStringWithoutExpressions(String expression) {
+        final String evaluatedExpression = TemplateEngine.templateEngine().getValue(expression, String.class);
+        assertEquals(expression, evaluatedExpression);
+    }
+
+    private static Stream<Arguments> expressionsWithoutVariables() {
+        return Stream.of(
+            Arguments.of("{2} {('abc'.matches('[0-9]{2}'))} {3}", "{2} false {3}"),
+            Arguments.of("{2} {a} {('78'.matches('[0-9]{2}'))} {3}", "{2} {a} true {3}"),
+            Arguments.of("{2} {('718'.matches('[0-9]{2}'))} {3}", "{2} false {3}"),
+            Arguments.of("{T(java.lang.String).format(\"%scd\", \"ab\")}", "abcd"),
+            Arguments.of("{T(java.lang.String).format(\"%scd\", \"{2}\")}", "{2}cd"),
+            Arguments.of("{  T ( java.lang.String ).format(\"%scd\", \"ab\")}", "abcd"),
+            Arguments.of("{ T ( java.lang.String ).format(\"%scd\", \"{2}\")}", "{2}cd"),
+            Arguments.of("{1 == 1}", "{1 == 1}"),
+            Arguments.of("{(1 == 1)}", "true"),
+            Arguments.of("{(12 == 1)}", "false")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("expressionsWithoutVariables")
+    void shouldEvaluateStringWithExpression(String expression, String expectedResult) {
+        final String evaluatedExpression = TemplateEngine.templateEngine().getValue(expression, String.class);
+        assertEquals(expectedResult, evaluatedExpression);
+    }
+
+    private static Stream<Arguments> expressionsWithVariables() {
+        return Stream.of(
+            Arguments.of("{2} {#request.pathInfo.matches('[0-9]{2}')} {3}", "{2} false {3}"),
+            Arguments.of("{2} {#request.pathInfo.matches('/my/path/[A-Z]{1}[0-9]{2}')} {3}", "{2} true {3}"),
+            Arguments.of("{2} {#request.pathInfo.matches('/my/path/[A-Z]{2}[0-9]{2}')} {3}", "{2} false {3}"),
+            Arguments.of("{2} {  #  request.pathInfo.matches ( '/my/path/[A-Z]{1}[0-9]{2}')} {3}", "{2} true {3}"),
+            Arguments.of("{2} {  #  request.pathInfo.matches ( '/my/path/[A-Z]{2}[0-9]{2}')} {3}", "{2} false {3}"),
+            Arguments.of("{ '/my/path/A58' == #request.pathInfo}", "{ '/my/path/A58' == #request.pathInfo}"),
+            Arguments.of("{('/my/path/A58'==#request.pathInfo)}", "true"),
+            Arguments.of("{('/my/path/A59'==#request.pathInfo)}", "false")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("expressionsWithVariables")
+    void shouldEvaluateStringWithExpressionContainingVariables(String expression, String expectedResult) {
+        lenient().when(request.pathInfo()).thenReturn("/my/path/A58");
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+
+        final String evaluatedExpression = engine.getValue(expression, String.class);
+        assertEquals(expectedResult, evaluatedExpression);
     }
 }
