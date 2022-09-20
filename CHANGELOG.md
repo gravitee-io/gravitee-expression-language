@@ -5,6 +5,13 @@
 
 * add test for getValue as Boolean and bump gravitee-gateway-api ([ba75187](https://github.com/gravitee-io/gravitee-expression-language/commit/ba751872355abaabf002c9e70bb321a2004711c2))
 
+# [1.11.0](https://github.com/gravitee-io/gravitee-expression-language/compare/1.10.1...1.11.0) (2022-08-17)
+
+
+### Features
+
+* use higher level HttpExecutionContext for TemplateProvider ([8cdc319](https://github.com/gravitee-io/gravitee-expression-language/commit/8cdc31911d2658339ca8cd9cf72c9743870e5485))
+
 ## [1.10.1](https://github.com/gravitee-io/gravitee-expression-language/compare/1.10.0...1.10.1) (2022-06-21)
 
 
