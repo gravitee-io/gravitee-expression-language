@@ -29,6 +29,7 @@ import org.springframework.expression.spel.SpelParserConfiguration;
  * @author GraviteeSource Team
  */
 public class SpelExpressionParser {
+
     private static final String EXPRESSION_PREFIX = "{#";
     private static final String EXPRESSION_SUFFIX = "}";
     // This transforms expressions prefixes from user input : {#, {(, or {T
@@ -36,7 +37,7 @@ public class SpelExpressionParser {
     // regular '{' characters won't be interpreted as expression prefixes by EL SpelExpressionParser
     private static final String EXPRESSION_REGEX = "\\{ *([#T(])";
     private static final Pattern EXPRESSION_REGEX_PATTERN = Pattern.compile(EXPRESSION_REGEX);
-    private static final String EXPRESSION_REGEX_SUBSTITUTE = EXPRESSION_PREFIX  + "$1";
+    private static final String EXPRESSION_REGEX_SUBSTITUTE = EXPRESSION_PREFIX + "$1";
     private static final ParserContext PARSER_CONTEXT = new TemplateParserContext(EXPRESSION_PREFIX, EXPRESSION_SUFFIX);
     private static final org.springframework.expression.spel.standard.SpelExpressionParser EXPRESSION_PARSER = new org.springframework.expression.spel.standard.SpelExpressionParser(
         new SpelParserConfiguration(SpelCompilerMode.MIXED, null)
