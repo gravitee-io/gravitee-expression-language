@@ -15,7 +15,7 @@
  */
 package io.gravitee.el.spel.context;
 
-import io.reactivex.annotations.NonNull;
+import io.reactivex.rxjava3.annotations.NonNull;
 import java.lang.reflect.Method;
 import org.springframework.expression.spel.support.ReflectiveMethodResolver;
 

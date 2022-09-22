@@ -19,10 +19,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import io.gravitee.el.spel.CachedExpression;
-import io.reactivex.Completable;
-import io.reactivex.Maybe;
-import io.reactivex.Single;
-import io.reactivex.observers.TestObserver;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -159,7 +159,8 @@ class SpelTemplateContextTest {
         cut.setDeferredVariable(VARIABLE_NAME, single);
 
         final TestObserver<EvaluationContext> obs = cut.evaluationContext(cachedExpression).test();
-        obs.assertErrorMessage(MOCK_EXCEPTION);
+        obs.assertError(RuntimeException.class);
+        obs.assertError(t -> MOCK_EXCEPTION.equals(t.getMessage()));
     }
 
     @Test
