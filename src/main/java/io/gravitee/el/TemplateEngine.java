@@ -16,7 +16,7 @@
 package io.gravitee.el;
 
 import io.gravitee.common.util.ServiceLoaderHelper;
-import io.reactivex.Maybe;
+import io.reactivex.rxjava3.core.Maybe;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)

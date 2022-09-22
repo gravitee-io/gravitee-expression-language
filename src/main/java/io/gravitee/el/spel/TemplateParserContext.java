@@ -15,7 +15,7 @@
  */
 package io.gravitee.el.spel;
 
-import io.reactivex.annotations.NonNull;
+import io.reactivex.rxjava3.annotations.NonNull;
 import org.springframework.expression.ParserContext;
 
 /**
