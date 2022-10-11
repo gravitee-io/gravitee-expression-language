@@ -777,7 +777,9 @@ public class SpelTemplateEngineTest {
             Arguments.of("{2} {  #  request.pathInfo.matches ( '/my/path/[A-Z]{2}[0-9]{2}')} {3}", "{2} false {3}"),
             Arguments.of("{ '/my/path/A58' == #request.pathInfo}", "{ '/my/path/A58' == #request.pathInfo}"),
             Arguments.of("{('/my/path/A58'==#request.pathInfo)}", "true"),
-            Arguments.of("{('/my/path/A59'==#request.pathInfo)}", "false")
+            Arguments.of("{('/my/path/A59'==#request.pathInfo)}", "false"),
+            Arguments.of("{T(java.lang.String).format(\"XX%sXX\", #request.pathInfo)}", "XX/my/path/A58XX"),
+            Arguments.of("{T(java.lang.String).format(\"XX%sXX\", {#request.pathInfo})}", "XX/my/path/A58XX")
         );
     }
 
