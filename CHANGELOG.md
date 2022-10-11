@@ -1,3 +1,10 @@
+## [1.9.7](https://github.com/gravitee-io/gravitee-expression-language/compare/1.9.6...1.9.7) (2022-10-11)
+
+
+### Bug Fixes
+
+* handle nested EL expressions ([92f81b4](https://github.com/gravitee-io/gravitee-expression-language/commit/92f81b4ec0e7b98e245769ab2a2a61aa75ca131f))
+
 ## [1.9.6](https://github.com/gravitee-io/gravitee-expression-language/compare/1.9.5...1.9.6) (2022-09-14)
 
 
