@@ -1,3 +1,10 @@
+# [2.0.0-alpha.2](https://github.com/gravitee-io/gravitee-expression-language/compare/2.0.0-alpha.1...2.0.0-alpha.2) (2022-10-18)
+
+
+### Bug Fixes
+
+* bump gateway-api as we don't mix rxJava versions ([3d51d73](https://github.com/gravitee-io/gravitee-expression-language/commit/3d51d7303f1d657fc728946b2f8cdcf2a29dc571))
+
 # [2.0.0-alpha.1](https://github.com/gravitee-io/gravitee-expression-language/compare/1.11.3...2.0.0-alpha.1) (2022-10-18)
 
 
