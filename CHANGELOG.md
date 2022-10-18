@@ -1,3 +1,15 @@
+# [2.0.0-alpha.1](https://github.com/gravitee-io/gravitee-expression-language/compare/1.11.3...2.0.0-alpha.1) (2022-10-18)
+
+
+### chore
+
+* bump to rxJava3 ([139b0b8](https://github.com/gravitee-io/gravitee-expression-language/commit/139b0b82aa3f39a473a98ecb3eba4ba19dab97b5))
+
+
+### BREAKING CHANGES
+
+* rxJava3 required
+
 ## [1.11.3](https://github.com/gravitee-io/gravitee-expression-language/compare/1.11.2...1.11.3) (2022-10-11)
 
 
