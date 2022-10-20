@@ -40,7 +40,7 @@
         <gravitee-gateway-api.version>1.40.0</gravitee-gateway-api.version>
         <jmh.version>1.35</jmh.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
-        <gravitee-node.version>1.24.1</gravitee-node.version>
+        <gravitee-node.version>1.27.2</gravitee-node.version>
     </properties>
 
     <dependencyManagement>
