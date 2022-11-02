@@ -795,7 +795,13 @@ public class SpelTemplateEngineTest {
             Arguments.of("{('/my/path/A58'==#request.pathInfo)}", "true"),
             Arguments.of("{('/my/path/A59'==#request.pathInfo)}", "false"),
             Arguments.of("{T(java.lang.String).format(\"XX%sXX\", #request.pathInfo)}", "XX/my/path/A58XX"),
-            Arguments.of("{T(java.lang.String).format(\"XX%sXX\", {#request.pathInfo})}", "XX/my/path/A58XX")
+            Arguments.of("{T(java.lang.String).format(\"XX%sXX\", {#request.pathInfo})}", "XX/my/path/A58XX"),
+            Arguments.of("{#request.headers[\"Route\"]}", "propertyKey"),
+            Arguments.of("{#properties[\"propertyKey\"]}", "propertyValue"),
+            Arguments.of("{#properties[{#request.headers[\"Route\"]}]}", "propertyValue"),
+            Arguments.of("{#properties[#request.headers[\"Route\"]]}", "propertyValue"),
+            Arguments.of("{#endpoints[\"twist-api-\"+{#properties[#request.headers[\"Route\"]]}]}", "endpoint"),
+            Arguments.of("{#endpoints[\"twist-api-\"+{#properties[{#request.headers[\"Route\"]}]}]}", "endpoint")
         );
     }
 
@@ -803,8 +809,11 @@ public class SpelTemplateEngineTest {
     @MethodSource("expressionsWithVariables")
     void shouldEvaluateStringWithExpressionContainingVariables(String expression, String expectedResult) {
         lenient().when(request.pathInfo()).thenReturn("/my/path/A58");
+        lenient().when(request.headers()).thenReturn(HttpHeaders.create().add("Route", "propertyKey"));
         final TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
+        engine.getTemplateContext().setVariable("properties", Map.of("propertyKey", "propertyValue"));
+        engine.getTemplateContext().setVariable("endpoints", Map.of("twist-api-propertyValue", "endpoint"));
 
         final String evaluatedExpression = engine.getValue(expression, String.class);
         assertEquals(expectedResult, evaluatedExpression);

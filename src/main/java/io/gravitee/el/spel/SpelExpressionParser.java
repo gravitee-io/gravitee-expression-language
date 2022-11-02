@@ -35,7 +35,7 @@ public class SpelExpressionParser {
     // This transforms expressions prefixes from user input : {#, {(, or {T
     // By prefixes that will be well interpreted by our TemplateParserContext : {##, {#(, or {#T
     // regular '{' characters won't be interpreted as expression prefixes by EL SpelExpressionParser
-    private static final String EXPRESSION_REGEX = "\\{ *([#T(])((?>[^{}]+|\\{(?>[^{}]+)*\\})*\\})";
+    private static final String EXPRESSION_REGEX = "\\{ *([#T(])((?>[^{}]+|\\{(?>[^{}]+)*\\}|\\{\\#(?>[^{}]+|\\{(?>[^{}]+)*\\})*\\})*\\})";
     private static final Pattern EXPRESSION_REGEX_PATTERN = Pattern.compile(EXPRESSION_REGEX);
     private static final String EXPRESSION_REGEX_SUBSTITUTE = EXPRESSION_PREFIX + "$1$2";
     private static final ParserContext PARSER_CONTEXT = new TemplateParserContext(EXPRESSION_PREFIX, EXPRESSION_SUFFIX);
