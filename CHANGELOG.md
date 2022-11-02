@@ -1,3 +1,10 @@
+## [1.11.4](https://github.com/gravitee-io/gravitee-expression-language/compare/1.11.3...1.11.4) (2022-11-02)
+
+
+### Bug Fixes
+
+* bump `gravitee-node` to 1.27.3 ([4a70208](https://github.com/gravitee-io/gravitee-expression-language/commit/4a7020804efd9170ede418cfd425fd7fef1efcd4))
+
 ## [1.11.3](https://github.com/gravitee-io/gravitee-expression-language/compare/1.11.2...1.11.3) (2022-10-11)
 
 

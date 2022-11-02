@@ -22,7 +22,7 @@
 
     <groupId>io.gravitee.el</groupId>
     <artifactId>gravitee-expression-language</artifactId>
-    <version>1.11.3</version>
+    <version>1.11.4</version>
 
     <name>Gravitee.io Common - Expression language module</name>
     <description>Gravitee.io Common - Expression language module</description>
