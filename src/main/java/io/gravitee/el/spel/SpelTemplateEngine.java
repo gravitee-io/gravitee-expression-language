@@ -19,7 +19,7 @@ import io.gravitee.el.TemplateContext;
 import io.gravitee.el.TemplateEngine;
 import io.gravitee.el.exceptions.ExpressionEvaluationException;
 import io.gravitee.el.spel.context.SpelTemplateContext;
-import io.reactivex.Maybe;
+import io.reactivex.rxjava3.core.Maybe;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.SpelEvaluationException;
