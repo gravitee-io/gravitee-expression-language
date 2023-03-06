@@ -15,7 +15,7 @@
  */
 package io.gravitee.el;
 
-import io.gravitee.gateway.jupiter.api.context.HttpExecutionContext;
+import io.gravitee.gateway.reactive.api.context.HttpExecutionContext;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
