@@ -1,3 +1,10 @@
+# [2.1.0-alpha.1](https://github.com/gravitee-io/gravitee-expression-language/compare/2.0.1...2.1.0-alpha.1) (2023-03-13)
+
+
+### Features
+
+* rename 'jupiter' package in 'reactive' ([b0812cb](https://github.com/gravitee-io/gravitee-expression-language/commit/b0812cb7f48d22dca7b6955ccf9488f1260482f7))
+
 # [2.1.0-alpha.1](https://github.com/gravitee-io/gravitee-expression-language/compare/2.0.1...2.1.0-alpha.1) (2023-03-09)
 
 
