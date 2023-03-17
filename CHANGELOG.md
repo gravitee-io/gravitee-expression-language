@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/gravitee-io/gravitee-expression-language/compare/2.1.0...2.1.1) (2023-03-17)
+
+
+### Bug Fixes
+
+* **deps:** update gateway-api to 2.1.0 ([9d00d46](https://github.com/gravitee-io/gravitee-expression-language/commit/9d00d46cc4b211646b72b0ae661c077c141e912b))
+
 # [2.1.0](https://github.com/gravitee-io/gravitee-expression-language/compare/2.0.1...2.1.0) (2023-03-17)
 
 
