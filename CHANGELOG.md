@@ -1,3 +1,15 @@
+# [2.1.0](https://github.com/gravitee-io/gravitee-expression-language/compare/2.0.1...2.1.0) (2023-03-17)
+
+
+### Bug Fixes
+
+* **deps:** upgrade gravitee-bom & gravitee-common ([f3ca2b9](https://github.com/gravitee-io/gravitee-expression-language/commit/f3ca2b9cac3385df4f7a6a11fa7ea34c40cc96c2))
+
+
+### Features
+
+* rename 'jupiter' package in 'reactive' ([29a3977](https://github.com/gravitee-io/gravitee-expression-language/commit/29a39775caac62d033cd73807ca20a12035bdc5f))
+
 # [2.1.0-alpha.1](https://github.com/gravitee-io/gravitee-expression-language/compare/2.0.1...2.1.0-alpha.1) (2023-03-13)
 
 
