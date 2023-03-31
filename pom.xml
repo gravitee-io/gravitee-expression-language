@@ -38,7 +38,7 @@
         <json-path.version>2.6.0</json-path.version>
         <gravitee-common.version>2.0.0</gravitee-common.version>
         <gravitee-gateway-api.version>2.1.0</gravitee-gateway-api.version>
-        <jmh.version>1.35</jmh.version>
+        <jmh.version>1.36</jmh.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
         <gravitee-node.version>2.0.0</gravitee-node.version>
     </properties>
