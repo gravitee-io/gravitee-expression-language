@@ -1,14 +1,50 @@
 {
   "extends": [
     "config:base",
-    "schedule:earlyMondays"
+    ":label(dependencies)"
   ],
-  "prConcurrentLimit": 3,
   "rebaseWhen": "conflicted",
   "packageRules": [
     {
-      "matchDatasources": ["orb"],
-      "rangeStrategy": "replace"
+      "matchDatasources": [
+        "orb"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "automerge": true,
+      "automergeType": "branch",
+      "semanticCommitType": "ci"
+    },
+    {
+      "matchDepTypes": [
+        "provided",
+        "test",
+        "build",
+        "import",
+        "parent"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "automerge": true,
+      "automergeType": "branch",
+      "semanticCommitType": "chore"
+    },
+    {
+      "matchDepTypes": [
+        "provided",
+        "test",
+        "build",
+        "import",
+        "parent"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "semanticCommitType": "chore"
     }
   ]
 }
