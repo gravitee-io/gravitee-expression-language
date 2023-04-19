@@ -22,7 +22,7 @@
 
     <groupId>io.gravitee.el</groupId>
     <artifactId>gravitee-expression-language</artifactId>
-    <version>2.1.1</version>
+    <version>2.2.0-archi-231-cache-manager-SNAPSHOT</version>
 
     <name>Gravitee.io Common - Expression language module</name>
     <description>Gravitee.io Common - Expression language module</description>
@@ -40,7 +40,7 @@
         <gravitee-gateway-api.version>2.1.0</gravitee-gateway-api.version>
         <jmh.version>1.36</jmh.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
-        <gravitee-node.version>2.0.0</gravitee-node.version>
+        <gravitee-node.version>3.1.0-alpha.5</gravitee-node.version>
     </properties>
 
     <dependencyManagement>
@@ -106,7 +106,12 @@
 
         <dependency>
             <groupId>io.gravitee.node</groupId>
-            <artifactId>gravitee-node-cache</artifactId>
+            <artifactId>gravitee-node-api</artifactId>
+            <version>${gravitee-node.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.gravitee.node</groupId>
+            <artifactId>gravitee-node-cache-common</artifactId>
             <version>${gravitee-node.version}</version>
         </dependency>
 
