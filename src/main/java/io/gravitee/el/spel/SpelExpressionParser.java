@@ -17,7 +17,7 @@ package io.gravitee.el.spel;
 
 import io.gravitee.node.api.cache.Cache;
 import io.gravitee.node.api.cache.CacheConfiguration;
-import io.gravitee.node.cache.standalone.StandaloneCache;
+import io.gravitee.node.plugin.cache.common.InMemoryCache;
 import java.util.regex.Pattern;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParserContext;
@@ -49,11 +49,13 @@ public class SpelExpressionParser {
     private static final int CACHE_EXPRESSION_IDLE_SECONDS = 3600;
 
     static {
-        final CacheConfiguration cacheConfiguration = new CacheConfiguration();
-        cacheConfiguration.setMaxSize(CACHE_EXPRESSION_MAX_SIZE);
-        cacheConfiguration.setTimeToIdleSeconds(CACHE_EXPRESSION_IDLE_SECONDS);
+        final CacheConfiguration cacheConfiguration = CacheConfiguration
+            .builder()
+            .maxSize(CACHE_EXPRESSION_MAX_SIZE)
+            .timeToIdleInMs(CACHE_EXPRESSION_IDLE_SECONDS)
+            .build();
 
-        expressions = new StandaloneCache<>("el", cacheConfiguration);
+        expressions = new InMemoryCache<>("el", cacheConfiguration);
     }
 
     public CachedExpression parseAndCacheExpression(String expression) {
