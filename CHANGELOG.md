@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/gravitee-io/gravitee-expression-language/compare/2.1.1...2.2.0) (2023-04-19)
+
+
+### Features
+
+* bump gravitee-node to use latest cache plugin ([506c745](https://github.com/gravitee-io/gravitee-expression-language/commit/506c74563235acb8e4aca05d5185c5eb54e048da))
+
 ## [2.1.1](https://github.com/gravitee-io/gravitee-expression-language/compare/2.1.0...2.1.1) (2023-03-17)
 
 

@@ -22,7 +22,7 @@
 
     <groupId>io.gravitee.el</groupId>
     <artifactId>gravitee-expression-language</artifactId>
-    <version>2.2.0-archi-231-cache-manager-SNAPSHOT</version>
+    <version>2.2.0</version>
 
     <name>Gravitee.io Common - Expression language module</name>
     <description>Gravitee.io Common - Expression language module</description>
