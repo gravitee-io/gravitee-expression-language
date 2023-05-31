@@ -39,20 +39,18 @@ public class SpelExpressionParser {
     private static final Pattern EXPRESSION_REGEX_PATTERN = Pattern.compile(EXPRESSION_REGEX);
     private static final String EXPRESSION_REGEX_SUBSTITUTE = EXPRESSION_PREFIX + "$1$2";
     private static final ParserContext PARSER_CONTEXT = new TemplateParserContext(EXPRESSION_PREFIX, EXPRESSION_SUFFIX);
-    private static final org.springframework.expression.spel.standard.SpelExpressionParser EXPRESSION_PARSER = new org.springframework.expression.spel.standard.SpelExpressionParser(
-        new SpelParserConfiguration(SpelCompilerMode.MIXED, null)
-    );
+    private org.springframework.expression.spel.standard.SpelExpressionParser expressionParser;
 
     protected static final Cache<String, CachedExpression> expressions;
 
     private static final int CACHE_EXPRESSION_MAX_SIZE = 20000;
-    private static final int CACHE_EXPRESSION_IDLE_SECONDS = 3600;
+    private static final int CACHE_EXPRESSION_IDLE_MILLIS = 3600000;
 
     static {
         final CacheConfiguration cacheConfiguration = CacheConfiguration
             .builder()
             .maxSize(CACHE_EXPRESSION_MAX_SIZE)
-            .timeToIdleInMs(CACHE_EXPRESSION_IDLE_SECONDS)
+            .timeToIdleInMs(CACHE_EXPRESSION_IDLE_MILLIS)
             .build();
 
         expressions = new InMemoryCache<>("el", cacheConfiguration);
@@ -71,9 +69,18 @@ public class SpelExpressionParser {
     }
 
     public Expression parseExpression(String expression) {
-        return EXPRESSION_PARSER.parseExpression(
-            EXPRESSION_REGEX_PATTERN.matcher(expression).replaceAll(EXPRESSION_REGEX_SUBSTITUTE),
-            PARSER_CONTEXT
-        );
+        return getParser()
+            .parseExpression(EXPRESSION_REGEX_PATTERN.matcher(expression).replaceAll(EXPRESSION_REGEX_SUBSTITUTE), PARSER_CONTEXT);
+    }
+
+    private org.springframework.expression.spel.standard.SpelExpressionParser getParser() {
+        if (expressionParser == null) {
+            expressionParser =
+                new org.springframework.expression.spel.standard.SpelExpressionParser(
+                    new SpelParserConfiguration(SpelCompilerMode.MIXED, this.getClass().getClassLoader())
+                );
+        }
+
+        return expressionParser;
     }
 }
