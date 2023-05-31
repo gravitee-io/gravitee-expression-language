@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/gravitee-io/gravitee-expression-language/compare/2.2.0...2.2.1) (2023-05-31)
+
+
+### Bug Fixes
+
+* define classloader in the SpelParser config to avoid exception in the reactive eval method ([b47d978](https://github.com/gravitee-io/gravitee-expression-language/commit/b47d978ec90138327df462bb7be9c9fc441804cf))
+
 # [2.2.0](https://github.com/gravitee-io/gravitee-expression-language/compare/2.1.1...2.2.0) (2023-04-19)
 
 
