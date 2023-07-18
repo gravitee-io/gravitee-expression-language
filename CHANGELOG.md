@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/gravitee-io/gravitee-expression-language/compare/2.2.1...3.0.0) (2023-07-18)
+
+
+### chore
+
+* **deps:** update gravitee-parent ([5cc4b6b](https://github.com/gravitee-io/gravitee-expression-language/commit/5cc4b6b0ba20d1839661f46bca30953712e1011a))
+
+
+### BREAKING CHANGES
+
+* **deps:** require Java17
+
 ## [2.2.1](https://github.com/gravitee-io/gravitee-expression-language/compare/2.2.0...2.2.1) (2023-05-31)
 
 
