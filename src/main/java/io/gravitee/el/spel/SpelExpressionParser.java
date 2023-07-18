@@ -30,8 +30,8 @@ import org.springframework.expression.spel.SpelParserConfiguration;
  */
 public class SpelExpressionParser {
 
-    private static final String EXPRESSION_PREFIX = "{#";
-    private static final String EXPRESSION_SUFFIX = "}";
+    public static final String EXPRESSION_PREFIX = "{#";
+    public static final String EXPRESSION_SUFFIX = "}";
     // This transforms expressions prefixes from user input : {#, {(, or {T
     // By prefixes that will be well interpreted by our TemplateParserContext : {##, {#(, or {#T
     // regular '{' characters won't be interpreted as expression prefixes by EL SpelExpressionParser
@@ -70,7 +70,11 @@ public class SpelExpressionParser {
 
     public Expression parseExpression(String expression) {
         return getParser()
-            .parseExpression(EXPRESSION_REGEX_PATTERN.matcher(expression).replaceAll(EXPRESSION_REGEX_SUBSTITUTE), PARSER_CONTEXT);
+            .parseExpression(EXPRESSION_REGEX_PATTERN.matcher(expression).replaceAll(EXPRESSION_REGEX_SUBSTITUTE), getParserContext());
+    }
+
+    protected ParserContext getParserContext() {
+        return PARSER_CONTEXT;
     }
 
     private org.springframework.expression.spel.standard.SpelExpressionParser getParser() {
