@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/gravitee-io/gravitee-expression-language/compare/3.0.0...3.0.1) (2023-07-19)
+
+
+### Bug Fixes
+
+* **deps:** update dependency io.gravitee.common:gravitee-common to v2.1.1 ([25316d4](https://github.com/gravitee-io/gravitee-expression-language/commit/25316d4980f9c3d1383ab775dc5e4d2ea6965358))
+
 # [3.0.0](https://github.com/gravitee-io/gravitee-expression-language/compare/2.2.1...3.0.0) (2023-07-18)
 
 
