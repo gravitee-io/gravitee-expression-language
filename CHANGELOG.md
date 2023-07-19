@@ -1,3 +1,10 @@
+# [3.1.0](https://github.com/gravitee-io/gravitee-expression-language/compare/3.0.2...3.1.0) (2023-07-19)
+
+
+### Features
+
+* add access to the EL parser for further customization ([9603d6c](https://github.com/gravitee-io/gravitee-expression-language/commit/9603d6cc9a691cfaac5d0c6dfa31fac444e0ba44))
+
 ## [3.0.2](https://github.com/gravitee-io/gravitee-expression-language/compare/3.0.1...3.0.2) (2023-07-19)
 
 
