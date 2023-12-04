@@ -30,7 +30,7 @@
     <parent>
         <groupId>io.gravitee</groupId>
         <artifactId>gravitee-parent</artifactId>
-        <version>22.0.13</version>
+        <version>22.0.14</version>
     </parent>
 
     <properties>
