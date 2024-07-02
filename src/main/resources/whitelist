@@ -19,6 +19,9 @@ class java.text.NumberFormat
 class java.text.ChoiceFormat
 class java.text.DecimalFormat
 class java.text.MessageFormat
+class java.util.Base64
+class java.util.Base64.Encoder
+class java.util.Base64.Decoder
 
 class java.util.Calendar
 

@@ -33,6 +33,7 @@ import io.gravitee.gateway.api.http.HttpHeaders;
 import io.reactivex.rxjava3.observers.TestObserver;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -615,6 +616,28 @@ public class SpelTemplateEngineTest {
         final TemplateEngine engine = TemplateEngine.templateEngine();
         final TestObserver<Boolean> obs = engine.eval("{ (#timestamp > 2) && (#timestamp < 2) }", Boolean.class).test();
         obs.assertResult(false);
+    }
+
+    @Test
+    public void shouldEvaluateBase64Encoding() {
+        String original = "original";
+        final String expected = Base64.getEncoder().encodeToString(original.getBytes());
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        engine
+            .eval("{ T(java.util.Base64).getEncoder().encodeToString('original'.getBytes()) }", String.class)
+            .test()
+            .assertResult(expected);
+    }
+
+    @Test
+    public void shouldEvaluateBase64Decoding() {
+        String original = "original";
+        final String encoded = Base64.getEncoder().encodeToString(original.getBytes());
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        engine
+            .eval("{(new java.lang.String(T(java.util.Base64).getDecoder().decode('" + encoded + "'))) }", String.class)
+            .test()
+            .assertResult(original);
     }
 
     @Test
