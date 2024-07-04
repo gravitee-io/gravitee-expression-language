@@ -1,3 +1,10 @@
+# [3.2.0](https://github.com/gravitee-io/gravitee-expression-language/compare/3.1.0...3.2.0) (2024-07-04)
+
+
+### Features
+
+* update whitelist to include base64 encoding and decoding classes ([c141fa2](https://github.com/gravitee-io/gravitee-expression-language/commit/c141fa2bf63b196cbb3ab7eb23e7661bf5ad61b6))
+
 # [3.1.0](https://github.com/gravitee-io/gravitee-expression-language/compare/3.0.2...3.1.0) (2023-07-19)
 
 
