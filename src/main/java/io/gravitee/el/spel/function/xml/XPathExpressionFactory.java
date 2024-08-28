@@ -29,12 +29,9 @@ public class XPathExpressionFactory {
 
     private static final XPathFactory xpathFactory = XPathFactory.newInstance();
 
-    public static XPathExpression createXPathExpression(String expression, Map<String, String> namespaces) {
+    public static XPathExpression createXPathExpression(String expression) {
         try {
             XPath xpath = createXPath();
-            SimpleNamespaceContext namespaceContext = new SimpleNamespaceContext();
-            namespaceContext.setBindings(namespaces);
-            xpath.setNamespaceContext(namespaceContext);
             javax.xml.xpath.XPathExpression xpathExpression = xpath.compile(expression);
             return new XPathExpression(xpathExpression, expression);
         } catch (XPathExpressionException var5) {
