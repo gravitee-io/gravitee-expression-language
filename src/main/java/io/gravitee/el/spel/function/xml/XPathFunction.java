@@ -15,9 +15,10 @@
  */
 package io.gravitee.el.spel.function.xml;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,6 +26,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.springframework.util.Assert;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -51,7 +54,7 @@ public final class XPathFunction {
     private static final DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY = DocumentBuilderFactoryUtils.newInstance();
 
     static {
-        DOCUMENT_BUILDER_FACTORY.setNamespaceAware(true);
+        DOCUMENT_BUILDER_FACTORY.setNamespaceAware(false);
     }
 
     private XPathFunction() {}
@@ -64,12 +67,18 @@ public final class XPathFunction {
             resultType = resultArg[0];
         }
 
-        XPathExpression expression = XPathExpressionFactory.createXPathExpression(xpath, Collections.emptyMap());
-        Node node = CONVERTER.convertToNode(object);
+        XPathExpression expression = XPathExpressionFactory.createXPathExpression(xpath);
 
         if (resultType == null) {
-            return (T) expression.evaluateAsString(node);
+            try {
+                DocumentBuilder documentBuilder = DOCUMENT_BUILDER_FACTORY.newDocumentBuilder();
+                Document document = documentBuilder.parse(new InputSource(new StringReader(object.toString())));
+                return (T) expression.evaluateAsString(document);
+            } catch (ParserConfigurationException | SAXException | IOException e) {
+                throw new XPathException("Unable to parse 'object' as XML document.", e);
+            }
         } else if (resultType instanceof String && RESULT_TYPES.contains(resultType)) {
+            Node node = CONVERTER.convertToNode(object);
             String resType = (String) resultType;
             if (DOCUMENT_LIST.equals(resType)) {
                 List<Node> nodeList = (List<Node>) XPathEvaluationType.NODE_LIST_RESULT.evaluateXPath(expression, node);
