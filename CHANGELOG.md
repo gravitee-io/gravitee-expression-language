@@ -1,3 +1,10 @@
+## [3.2.1](https://github.com/gravitee-io/gravitee-expression-language/compare/3.2.0...3.2.1) (2024-08-30)
+
+
+### Bug Fixes
+
+* document builder should not be namespace aware as namespace are not extracted from EL ([563e152](https://github.com/gravitee-io/gravitee-expression-language/commit/563e152fa1205e84cafb732c3b204436a22daa55))
+
 # [3.2.0](https://github.com/gravitee-io/gravitee-expression-language/compare/3.1.0...3.2.0) (2024-07-04)
 
 
