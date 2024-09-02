@@ -1,3 +1,10 @@
+## [3.2.2](https://github.com/gravitee-io/gravitee-expression-language/compare/3.2.1...3.2.2) (2024-09-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency com.jayway.jsonpath:json-path to v2.9.0 [security] ([f3b2d1a](https://github.com/gravitee-io/gravitee-expression-language/commit/f3b2d1aa362955d3d34e6a1c069ddafb5c0187c6))
+
 ## [3.2.1](https://github.com/gravitee-io/gravitee-expression-language/compare/3.2.0...3.2.1) (2024-08-30)
 
 
