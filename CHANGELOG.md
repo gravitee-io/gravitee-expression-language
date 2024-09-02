@@ -1,3 +1,12 @@
+## [3.2.3](https://github.com/gravitee-io/gravitee-expression-language/compare/3.2.2...3.2.3) (2024-09-02)
+
+
+### Bug Fixes
+
+* **deps:** bump gravitee-common ([f1dec3d](https://github.com/gravitee-io/gravitee-expression-language/commit/f1dec3d6cfc73cda1167955bfe0767a0d6faf99d))
+* **deps:** bump gravitee-gateway-api ([36e41e4](https://github.com/gravitee-io/gravitee-expression-language/commit/36e41e4d744b66608da0cbf316947e65165dcbb1))
+* **deps:** bump gravitee-node ([120df98](https://github.com/gravitee-io/gravitee-expression-language/commit/120df98c60598af60e47b9bac1ce9a6ba9ec35cc))
+
 ## [3.2.2](https://github.com/gravitee-io/gravitee-expression-language/compare/3.2.1...3.2.2) (2024-09-02)
 
 
