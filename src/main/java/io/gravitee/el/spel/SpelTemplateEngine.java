@@ -35,8 +35,12 @@ public class SpelTemplateEngine implements TemplateEngine {
     private final io.gravitee.el.spel.SpelExpressionParser spelExpressionParser;
 
     public SpelTemplateEngine(io.gravitee.el.spel.SpelExpressionParser spelExpressionParser) {
+        this(spelExpressionParser, new SpelTemplateContext());
+    }
+
+    public SpelTemplateEngine(io.gravitee.el.spel.SpelExpressionParser spelExpressionParser, SpelTemplateContext spelTemplateContext) {
         this.spelExpressionParser = spelExpressionParser;
-        this.templateContext = new SpelTemplateContext();
+        this.templateContext = spelTemplateContext;
     }
 
     @Override

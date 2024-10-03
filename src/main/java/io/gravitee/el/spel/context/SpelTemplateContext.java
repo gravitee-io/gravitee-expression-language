@@ -42,7 +42,11 @@ public class SpelTemplateContext implements TemplateContext {
     private Map<String, Object> deferredVariables;
 
     public SpelTemplateContext() {
-        context = new SecuredEvaluationContext();
+        this(new SecuredEvaluationContext());
+    }
+
+    public SpelTemplateContext(SecuredEvaluationContext context) {
+        this.context = context;
         context.setVariable("jsonPath", JSON_PATH_EVAL_METHOD);
         context.setVariable("xpath", XPATH_EVAL_METHOD);
     }
