@@ -15,8 +15,6 @@
  */
 package io.gravitee.el;
 
-import io.gravitee.gateway.reactive.api.context.HttpExecutionContext;
-
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
@@ -28,15 +26,4 @@ public interface TemplateVariableProvider {
      * @param templateContext the template context where to add the variables.
      */
     void provide(TemplateContext templateContext);
-
-    /**
-     * Same as {@link #provide(TemplateContext)} but with a {@link HttpExecutionContext} allowing to have access to the complete request context
-     * (including request and response) as well as the {@link TemplateEngine} and {@link TemplateContext}.
-     * It offers more flexibility to the template variable provider when it comes to provide template variables that are coming from the current execution context.
-     *
-     * @param ctx the current request execution context.
-     */
-    default <T extends HttpExecutionContext> void provide(T ctx) {
-        provide(ctx.getTemplateEngine().getTemplateContext());
-    }
 }
