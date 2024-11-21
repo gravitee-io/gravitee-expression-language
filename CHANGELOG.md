@@ -1,3 +1,16 @@
+# [4.0.0-alpha.1](https://github.com/gravitee-io/gravitee-expression-language/compare/3.2.3...4.0.0-alpha.1) (2024-11-21)
+
+
+### Features
+
+* remove variable provider provide(ctx) method ([dd63fb3](https://github.com/gravitee-io/gravitee-expression-language/commit/dd63fb3b8317878453e8cd2f2f88b6334a1ec704))
+
+
+### BREAKING CHANGES
+
+* signature change for provide(ExecutionContext)
+https://gravitee.atlassian.net/browse/APIM-7417
+
 ## [3.2.3](https://github.com/gravitee-io/gravitee-expression-language/compare/3.2.2...3.2.3) (2024-09-02)
 
 
