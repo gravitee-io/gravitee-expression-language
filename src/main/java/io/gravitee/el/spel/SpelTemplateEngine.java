@@ -41,6 +41,11 @@ public class SpelTemplateEngine implements TemplateEngine {
 
     @Override
     public <T> T getValue(String expression, Class<T> clazz) {
+        return evalNow(expression, clazz);
+    }
+
+    @Override
+    public <T> T evalNow(String expression, Class<T> clazz) {
         return eval(spelExpressionParser.parseExpression(expression), templateContext.getContext(), clazz);
     }
 

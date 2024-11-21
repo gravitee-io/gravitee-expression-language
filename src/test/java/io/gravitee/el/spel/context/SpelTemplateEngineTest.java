@@ -707,8 +707,8 @@ public class SpelTemplateEngineTest {
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        assertTrue(engine.getValue("{ #request.headers.containsAllKeys({'Header1', 'Header2'}) }", Boolean.class));
-        assertFalse(engine.getValue("{ #request.headers.containsAllKeys({'Header1', 'Header2', 'Header3'}) }", Boolean.class));
+        assertTrue(engine.evalNow("{ #request.headers.containsAllKeys({'Header1', 'Header2'}) }", Boolean.class));
+        assertFalse(engine.evalNow("{ #request.headers.containsAllKeys({'Header1', 'Header2', 'Header3'}) }", Boolean.class));
     }
 
     @Test
@@ -751,7 +751,7 @@ public class SpelTemplateEngineTest {
         final TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        assertTrue(engine.getValue("{#request.pathInfo.matches('" + regex + "')}", Boolean.class));
+        assertTrue(engine.evalNow("{#request.pathInfo.matches('" + regex + "')}", Boolean.class));
     }
 
     @Test
@@ -767,7 +767,7 @@ public class SpelTemplateEngineTest {
         final TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        assertTrue(engine.getValue("{#request.pathInfo.matches('" + regex + "')}", Boolean.class));
+        assertTrue(engine.evalNow("{#request.pathInfo.matches('" + regex + "')}", Boolean.class));
     }
 
     @ParameterizedTest
@@ -784,7 +784,7 @@ public class SpelTemplateEngineTest {
         }
     )
     void shouldEvaluateSimpleStringWithoutExpressions(String expression) {
-        final String evaluatedExpression = TemplateEngine.templateEngine().getValue(expression, String.class);
+        final String evaluatedExpression = TemplateEngine.templateEngine().evalNow(expression, String.class);
         assertEquals(expression, evaluatedExpression);
     }
 
@@ -806,7 +806,7 @@ public class SpelTemplateEngineTest {
     @ParameterizedTest
     @MethodSource("expressionsWithoutVariables")
     void shouldEvaluateStringWithExpression(String expression, String expectedResult) {
-        final String evaluatedExpression = TemplateEngine.templateEngine().getValue(expression, String.class);
+        final String evaluatedExpression = TemplateEngine.templateEngine().evalNow(expression, String.class);
         assertEquals(expectedResult, evaluatedExpression);
     }
 
@@ -832,7 +832,7 @@ public class SpelTemplateEngineTest {
         final TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
-        final String evaluatedExpression = engine.getValue(expression, String.class);
+        final String evaluatedExpression = engine.evalNow(expression, String.class);
         assertEquals(expectedResult, evaluatedExpression);
     }
 }
