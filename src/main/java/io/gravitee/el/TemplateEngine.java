@@ -57,13 +57,25 @@ public interface TemplateEngine {
      *
      * @return the result of the evaluation.
      * @see #eval(String, Class)
-     * @deprecated this method is deprecated in favor of {@link #eval(String, Class)} that supports reactive.
+     * @deprecated this method is deprecated in favor of {@link #eval(String, Class)} or {@link #evalNow(String, Class)}.
      */
     @Deprecated(since = "1.10.0", forRemoval = true)
     <T> T getValue(String expression, Class<T> clazz);
 
     /**
      * Evaluate the el expression against the current template context.
+     *
+     * @param expression the el expression to evaluate.
+     * @param clazz the class of the expected result .
+     * @param <T> the expected result type.
+     *
+     * @return the result of the evaluation.
+     * @see #eval(String, Class)
+     */
+    <T> T evalNow(String expression, Class<T> clazz);
+
+    /**
+     * Evaluate the el expression against the current template context in a reactive context.
      *
      * @param expression the el expression to evaluate.
      * @param clazz the class of the expected result .
