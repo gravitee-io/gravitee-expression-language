@@ -1,3 +1,10 @@
+# [4.0.0-alpha.2](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.0-alpha.1...4.0.0-alpha.2) (2024-11-21)
+
+
+### Features
+
+* add evalNow to evaluate EL ([9588b34](https://github.com/gravitee-io/gravitee-expression-language/commit/9588b34df20249acd7757d9c37e1aead7ee35fea))
+
 # [4.0.0-alpha.1](https://github.com/gravitee-io/gravitee-expression-language/compare/3.2.3...4.0.0-alpha.1) (2024-11-21)
 
 
