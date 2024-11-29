@@ -1,0 +1,4 @@
+io.gravitee.el.TemplateVariableProvider=\
+    io.gravitee.el.spel.TemplateVariableFactoryTest.APITemplateVariableProvider,\
+  io.gravitee.el.spel.TemplateVariableFactoryTest.UnAnnotatedTestTemplateProvider,\
+  io.gravitee.el.spel.TemplateVariableFactoryTest.WrongScopeTemplateVariableProvider
