@@ -90,8 +90,8 @@ method io.gravitee.gateway.api.http.HttpHeaders toSingleValueMap
 
 method io.gravitee.common.util.MultiValueMap containsAllKeys java.util.Collection
 
-method io.gravitee.secrets.api.el.DelegatingEvaluatedSecretsMethods fromGrant java.lang.String io.gravitee.secrets.api.el.RuntimeContext
-method io.gravitee.secrets.api.el.DelegatingEvaluatedSecretsMethods fromGrant java.lang.String java.lang.String io.gravitee.secrets.api.el.RuntimeContext
-method io.gravitee.secrets.api.el.DelegatingEvaluatedSecretsMethods fromEL java.lang.String java.lang.String java.lang.String java.lang.String java.util.List io.gravitee.secrets.api.el.RuntimeContext
+method io.gravitee.secrets.api.el.DelegatingEvaluatedSecretsMethods fromGrant java.lang.String io.gravitee.secrets.api.el.SecretFieldAccessControl
+method io.gravitee.secrets.api.el.DelegatingEvaluatedSecretsMethods fromGrant java.lang.String java.lang.String io.gravitee.secrets.api.el.SecretFieldAccessControl
+method io.gravitee.secrets.api.el.DelegatingEvaluatedSecretsMethods fromEL java.lang.String java.lang.String java.lang.String java.lang.String java.util.List io.gravitee.secrets.api.el.SecretFieldAccessControl
 
 # Allows by constructor signatures
