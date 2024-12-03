@@ -18,19 +18,24 @@ package io.gravitee.el;
 import io.gravitee.el.annotations.TemplateVariable;
 import java.util.Arrays;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
+@RequiredArgsConstructor
 public abstract class AbstractSpringFactoriesLoaderTemplateVariableProviderFactory implements TemplateVariableProviderFactory {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractSpringFactoriesLoaderTemplateVariableProviderFactory.class);
 
     private List<TemplateVariableProvider> providers;
+
+    protected final ApplicationContext applicationContext;
 
     @Override
     public List<TemplateVariableProvider> getTemplateVariableProviders() {
@@ -41,7 +46,7 @@ public abstract class AbstractSpringFactoriesLoaderTemplateVariableProviderFacto
                     .forDefaultResourceLocation(classLoader)
                     .load(
                         TemplateVariableProvider.class,
-                        null,
+                        SpringFactoriesLoader.ArgumentResolver.from(applicationContext::getBean),
                         (cls, factory, err) ->
                             logger.warn("TemplateVariableProvider loading error for factory {}: {}", factory, err.getMessage())
                     )

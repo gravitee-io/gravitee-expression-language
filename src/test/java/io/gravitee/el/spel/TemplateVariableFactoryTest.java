@@ -23,24 +23,35 @@ import io.gravitee.el.TemplateVariableProvider;
 import io.gravitee.el.TemplateVariableScope;
 import io.gravitee.el.annotations.TemplateVariable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 
 /**
  * @author Benoit BORDIGONI (benoit.bordigoni at graviteesource.com)
  * @author GraviteeSource Team
  */
+@ExtendWith(MockitoExtension.class)
 class TemplateVariableFactoryTest {
 
-    AbstractSpringFactoriesLoaderTemplateVariableProviderFactory underTest = new TestFactory();
+    @Mock
+    ApplicationContext applicationContext;
 
     @Test
     void should_find_only_one_provider() {
+        AbstractSpringFactoriesLoaderTemplateVariableProviderFactory underTest = new TestFactory(applicationContext);
         assertThat(SpringFactoriesLoader.forDefaultResourceLocation().load(TemplateVariableProvider.class)).hasSize(3);
         assertThat(underTest.getTemplateVariableProviders()).hasSize(1);
         assertThat(underTest.getTemplateVariableProviders().get(0)).isInstanceOf(APITemplateVariableProvider.class);
     }
 
     static class TestFactory extends AbstractSpringFactoriesLoaderTemplateVariableProviderFactory {
+
+        public TestFactory(ApplicationContext applicationContext) {
+            super(applicationContext);
+        }
 
         @Override
         public TemplateVariableScope getTemplateVariableScope() {
