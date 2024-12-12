@@ -46,25 +46,27 @@ import org.springframework.util.ClassUtils;
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
  * @author GraviteeSource Team
  */
+// Singleton is OK here
+@SuppressWarnings("java:S6548")
 public class SecuredResolver {
 
     private static final Logger logger = LoggerFactory.getLogger(SecuredResolver.class);
     private static final Method[] EMPTY = new Method[0];
-    public static final String WHITELIST_MODE = "append";
+    public static final String APPEND_WHITELIST_MODE = "append";
     public static final String EL_WHITELIST_MODE_KEY = "el.whitelist.mode";
     public static final String EL_WHITELIST_LIST_KEY = "el.whitelist.list";
     public static final String WHITELIST_METHOD_PREFIX = "method ";
     public static final String WHITELIST_CLASS_PREFIX = "class ";
     static final String WHITELIST_CONSTRUCTOR_PREFIX = "new ";
 
-    private static SecuredResolver INSTANCE;
+    private static SecuredResolver instance;
     private static final Map<Class<?>, Method[]> methodsByType = new ConcurrentHashMap<>();
     private static final Map<Class<?>, Method[]> methodsByTypeAndSuperTypes = new ConcurrentHashMap<>();
     private static final Set<Constructor<?>> allConstructors = ConcurrentHashMap.newKeySet();
 
     /**
      * Initialize the method resolver loading all whitelisted methods from environment configuration and / or built-in whitelist.
-     * Once initialized, instance of {@link SecuredResolver} can be retrieved using {@link SecuredResolver#INSTANCE}.
+     * Once initialized, instance of {@link SecuredResolver} can be retrieved using {@link SecuredResolver#instance}.
      *
      * @param environment an optional environment, if <code>null</code>, only built-in whitelist will be initialized.
      */
@@ -76,11 +78,11 @@ public class SecuredResolver {
     }
 
     static SecuredResolver getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new SecuredResolver();
+        if (instance == null) {
+            instance = new SecuredResolver();
         }
 
-        return INSTANCE;
+        return instance;
     }
 
     private SecuredResolver() {}
@@ -116,8 +118,8 @@ public class SecuredResolver {
 
         // Load whitelist from configuration.
         if (environment != null) {
-            // Built-in whitelist will not be loaded if mode is not 'append' (ie: set to 'replace').
-            loadBuiltInWhitelist = WHITELIST_MODE.equals(environment.getProperty(EL_WHITELIST_MODE_KEY, WHITELIST_MODE));
+            // Built-in whitelist will be loaded only if mode is 'append' ( as opposed to 'replace').
+            loadBuiltInWhitelist = APPEND_WHITELIST_MODE.equals(environment.getProperty(EL_WHITELIST_MODE_KEY, APPEND_WHITELIST_MODE));
 
             Collection<Object> configWhitelist = EnvironmentUtils
                 .getPropertiesStartingWith((ConfigurableEnvironment) environment, EL_WHITELIST_LIST_KEY)
@@ -173,7 +175,7 @@ public class SecuredResolver {
         }
     }
 
-    private static Method parseMethod(String declaration) throws Exception {
+    private static Method parseMethod(String declaration) throws ClassNotFoundException, NoSuchMethodException {
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         String methodName = split[2];
@@ -193,7 +195,7 @@ public class SecuredResolver {
         return clazz.getDeclaredMethod(methodName, argumentClasses);
     }
 
-    private static List<Method> parseAllMethods(String declaration) throws Exception {
+    private static List<Method> parseAllMethods(String declaration) throws ClassNotFoundException {
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         Class<?> clazz = ClassUtils.forName(clazzName, SpelTemplateContext.class.getClassLoader());
@@ -201,7 +203,7 @@ public class SecuredResolver {
         return Arrays.asList(clazz.getDeclaredMethods());
     }
 
-    private static Constructor<?> parseConstructor(String declaration) throws Exception {
+    private static Constructor<?> parseConstructor(String declaration) throws ClassNotFoundException, NoSuchMethodException {
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         String[] methodArgs = {};
@@ -221,7 +223,7 @@ public class SecuredResolver {
         return clazz.getDeclaredConstructor(argumentClasses);
     }
 
-    private static List<Constructor<?>> parseAllConstructors(String declaration) throws Exception {
+    private static List<Constructor<?>> parseAllConstructors(String declaration) throws ClassNotFoundException {
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
