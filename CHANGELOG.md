@@ -1,3 +1,10 @@
+# [4.0.0-alpha.3](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.0-alpha.2...4.0.0-alpha.3) (2024-12-12)
+
+
+### Bug Fixes
+
+* updates to support secret ([#116](https://github.com/gravitee-io/gravitee-expression-language/issues/116)) ([0e7c70d](https://github.com/gravitee-io/gravitee-expression-language/commit/0e7c70db7b5f7aed035a8b3a8976737d3e155192))
+
 # [4.0.0-alpha.2](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.0-alpha.1...4.0.0-alpha.2) (2024-11-21)
 
 
