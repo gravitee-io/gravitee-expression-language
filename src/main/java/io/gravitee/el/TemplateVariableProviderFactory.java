@@ -15,15 +15,14 @@
  */
 package io.gravitee.el;
 
+import java.util.List;
+
 /**
- * @author David BRASSELY (david.brassely at graviteesource.com)
+ * @author Benoit BORDIGONI (benoit.bordigoni at graviteesource.com)
  * @author GraviteeSource Team
  */
-public interface TemplateVariableProvider {
-    /**
-     * Method to call to provided variables to the {@link TemplateEngine} by adding variables to the {@link TemplateContext}.
-     *
-     * @param templateContext the template context where to add the variables.
-     */
-    void provide(TemplateContext templateContext);
+public interface TemplateVariableProviderFactory {
+    List<TemplateVariableProvider> getTemplateVariableProviders();
+
+    TemplateVariableScope getTemplateVariableScope();
 }

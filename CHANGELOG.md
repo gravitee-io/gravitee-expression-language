@@ -1,3 +1,44 @@
+# [4.0.0-alpha.5](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.0-alpha.4...4.0.0-alpha.5) (2024-12-30)
+
+
+### Bug Fixes
+
+* **deps:** bump gravitee-node & gravitee-gateway-api ([fede4b0](https://github.com/gravitee-io/gravitee-expression-language/commit/fede4b0899cf93810535ed6970128264cdd5d2f1))
+
+# [4.0.0-alpha.4](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.0-alpha.3...4.0.0-alpha.4) (2024-12-30)
+
+
+### Features
+
+* add while list for secrets.get() methods ([b5526de](https://github.com/gravitee-io/gravitee-expression-language/commit/b5526deb1a42592fcbae8e0c05036198fd38d5c5))
+
+# [4.0.0-alpha.3](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.0-alpha.2...4.0.0-alpha.3) (2024-12-12)
+
+
+### Bug Fixes
+
+* updates to support secret ([#116](https://github.com/gravitee-io/gravitee-expression-language/issues/116)) ([0e7c70d](https://github.com/gravitee-io/gravitee-expression-language/commit/0e7c70db7b5f7aed035a8b3a8976737d3e155192))
+
+# [4.0.0-alpha.2](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.0-alpha.1...4.0.0-alpha.2) (2024-11-21)
+
+
+### Features
+
+* add evalNow to evaluate EL ([9588b34](https://github.com/gravitee-io/gravitee-expression-language/commit/9588b34df20249acd7757d9c37e1aead7ee35fea))
+
+# [4.0.0-alpha.1](https://github.com/gravitee-io/gravitee-expression-language/compare/3.2.3...4.0.0-alpha.1) (2024-11-21)
+
+
+### Features
+
+* remove variable provider provide(ctx) method ([dd63fb3](https://github.com/gravitee-io/gravitee-expression-language/commit/dd63fb3b8317878453e8cd2f2f88b6334a1ec704))
+
+
+### BREAKING CHANGES
+
+* signature change for provide(ExecutionContext)
+https://gravitee.atlassian.net/browse/APIM-7417
+
 ## [3.2.3](https://github.com/gravitee-io/gravitee-expression-language/compare/3.2.2...3.2.3) (2024-09-02)
 
 
