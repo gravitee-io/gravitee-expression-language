@@ -1,3 +1,10 @@
+# [4.0.0-alpha.4](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.0-alpha.3...4.0.0-alpha.4) (2024-12-30)
+
+
+### Features
+
+* add while list for secrets.get() methods ([b5526de](https://github.com/gravitee-io/gravitee-expression-language/commit/b5526deb1a42592fcbae8e0c05036198fd38d5c5))
+
 # [4.0.0-alpha.3](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.0-alpha.2...4.0.0-alpha.3) (2024-12-12)
 
 
