@@ -1,3 +1,10 @@
+# [4.0.0-alpha.5](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.0-alpha.4...4.0.0-alpha.5) (2024-12-30)
+
+
+### Bug Fixes
+
+* **deps:** bump gravitee-node & gravitee-gateway-api ([fede4b0](https://github.com/gravitee-io/gravitee-expression-language/commit/fede4b0899cf93810535ed6970128264cdd5d2f1))
+
 # [4.0.0-alpha.4](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.0-alpha.3...4.0.0-alpha.4) (2024-12-30)
 
 
