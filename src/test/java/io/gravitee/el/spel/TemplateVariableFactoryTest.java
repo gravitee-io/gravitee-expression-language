@@ -16,6 +16,7 @@
 package io.gravitee.el.spel;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import io.gravitee.el.AbstractSpringFactoriesLoaderTemplateVariableProviderFactory;
 import io.gravitee.el.TemplateContext;
@@ -27,7 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.support.SpringFactoriesLoader;
 
 /**
  * @author Benoit BORDIGONI (benoit.bordigoni at graviteesource.com)
@@ -41,15 +41,36 @@ class TemplateVariableFactoryTest {
 
     @Test
     void should_find_only_one_provider() {
-        AbstractSpringFactoriesLoaderTemplateVariableProviderFactory underTest = new TestFactory(applicationContext);
-        assertThat(SpringFactoriesLoader.forDefaultResourceLocation().load(TemplateVariableProvider.class)).hasSize(3);
+        AbstractSpringFactoriesLoaderTemplateVariableProviderFactory underTest = new TestApiScopeVariableProviderFactory(
+            applicationContext
+        );
+
+        // mimic what BeanFactoryUtils.beanNamesForTypeIncludingAncestors should return
+        when(applicationContext.getBeanNamesForType(TemplateVariableProvider.class))
+            .thenReturn(
+                new String[] {
+                    APITemplateVariableProvider.class.getSimpleName(),
+                    WrongScopeTemplateVariableProvider.class.getSimpleName(),
+                    UnAnnotatedTestTemplateProvider.class.getSimpleName(),
+                }
+            );
+        when(applicationContext.getParentBeanFactory()).thenReturn(null);
+
+        // mimic beans being returned
+        when(applicationContext.getBean(APITemplateVariableProvider.class.getSimpleName())).thenReturn(new APITemplateVariableProvider());
+        when(applicationContext.getBean(WrongScopeTemplateVariableProvider.class.getSimpleName()))
+            .thenReturn(new UnAnnotatedTestTemplateProvider());
+        when(applicationContext.getBean(UnAnnotatedTestTemplateProvider.class.getSimpleName()))
+            .thenReturn(new WrongScopeTemplateVariableProvider());
+
+        // check that among those three beans only one is selected
         assertThat(underTest.getTemplateVariableProviders()).hasSize(1);
         assertThat(underTest.getTemplateVariableProviders().get(0)).isInstanceOf(APITemplateVariableProvider.class);
     }
 
-    static class TestFactory extends AbstractSpringFactoriesLoaderTemplateVariableProviderFactory {
+    static class TestApiScopeVariableProviderFactory extends AbstractSpringFactoriesLoaderTemplateVariableProviderFactory {
 
-        public TestFactory(ApplicationContext applicationContext) {
+        public TestApiScopeVariableProviderFactory(ApplicationContext applicationContext) {
             super(applicationContext);
         }
 
