@@ -18,20 +18,17 @@ package io.gravitee.el;
 import io.gravitee.el.annotations.TemplateVariable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.support.SpringFactoriesLoader;
 
 /**
- * @author David BRASSELY (david.brassely at graviteesource.com)
+ * @author Benoit Bordigoni (benoit.bordigoni at graviteesource.com)
  * @author GraviteeSource Team
  */
 @RequiredArgsConstructor
 public abstract class AbstractSpringFactoriesLoaderTemplateVariableProviderFactory implements TemplateVariableProviderFactory {
-
-    private final Logger logger = LoggerFactory.getLogger(AbstractSpringFactoriesLoaderTemplateVariableProviderFactory.class);
 
     private List<TemplateVariableProvider> providers;
 
@@ -40,27 +37,16 @@ public abstract class AbstractSpringFactoriesLoaderTemplateVariableProviderFacto
     @Override
     public List<TemplateVariableProvider> getTemplateVariableProviders() {
         if (providers == null) {
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             providers =
-                SpringFactoriesLoader
-                    .forDefaultResourceLocation(classLoader)
-                    .load(
-                        TemplateVariableProvider.class,
-                        SpringFactoriesLoader.ArgumentResolver.from(applicationContext::getBean),
-                        (cls, factory, err) ->
-                            logger.warn("TemplateVariableProvider loading error for factory {}: {}", factory, err.getMessage())
-                    )
-                    .stream()
+                Stream
+                    .of(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, TemplateVariableProvider.class))
+                    .map(name -> (TemplateVariableProvider) applicationContext.getBean(name))
                     .filter(provider -> {
-                        if (provider != null) {
-                            TemplateVariable annotation = provider.getClass().getAnnotation(TemplateVariable.class);
-                            return annotation != null && Arrays.asList(annotation.scopes()).contains(getTemplateVariableScope());
-                        }
-                        return false;
+                        TemplateVariable annotation = provider.getClass().getAnnotation(TemplateVariable.class);
+                        return annotation != null && Arrays.asList(annotation.scopes()).contains(getTemplateVariableScope());
                     })
                     .toList();
         }
-
         return providers;
     }
 }
