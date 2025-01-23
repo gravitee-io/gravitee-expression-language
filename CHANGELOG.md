@@ -1,3 +1,10 @@
+## [4.0.1](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.0...4.0.1) (2025-01-23)
+
+
+### Bug Fixes
+
+* template variable discovery failed to find them all ([5e9e1db](https://github.com/gravitee-io/gravitee-expression-language/commit/5e9e1dbb352f372161412bba5d40a19fc078c3f0))
+
 # [4.0.0](https://github.com/gravitee-io/gravitee-expression-language/compare/3.2.3...4.0.0) (2024-12-30)
 
 
