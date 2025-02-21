@@ -1,3 +1,11 @@
+## [4.0.2](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.1...4.0.2) (2025-02-21)
+
+
+### Bug Fixes
+
+* **deps:** bump gravitee-gateway-api to 3.11.1 ([d28618b](https://github.com/gravitee-io/gravitee-expression-language/commit/d28618b29ea94fe35144645ad9a4ea37ff3b84a3))
+* **deps:** bump gravitee-node to 7.0.7 ([1b1bbaf](https://github.com/gravitee-io/gravitee-expression-language/commit/1b1bbaf213439c65eaf492415f76131b82adcd2e))
+
 ## [4.0.1](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.0...4.0.1) (2025-01-23)
 
 
