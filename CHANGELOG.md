@@ -1,3 +1,10 @@
+## [4.0.3](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.2...4.0.3) (2025-02-22)
+
+
+### Bug Fixes
+
+* **deps:** define json-smart dependency to force version 2.5.2 ([8250d6b](https://github.com/gravitee-io/gravitee-expression-language/commit/8250d6b24b3fcaf4629faca415680af1677211cb))
+
 ## [4.0.2](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.1...4.0.2) (2025-02-21)
 
 
