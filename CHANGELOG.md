@@ -1,3 +1,10 @@
+## [4.0.4](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.3...4.0.4) (2025-02-24)
+
+
+### Bug Fixes
+
+* define the correct method in whitelist ([678c0e4](https://github.com/gravitee-io/gravitee-expression-language/commit/678c0e457b925946785b614bb0cda8acdbfb0ed5))
+
 ## [4.0.3](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.2...4.0.3) (2025-02-22)
 
 
