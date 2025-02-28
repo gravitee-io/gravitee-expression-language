@@ -15,6 +15,7 @@
  */
 package io.gravitee.el.spel;
 
+import io.gravitee.el.spel.context.SpelTemplateContext;
 import io.gravitee.node.api.cache.Cache;
 import io.gravitee.node.api.cache.CacheConfiguration;
 import io.gravitee.node.plugin.cache.common.InMemoryCache;
@@ -56,13 +57,13 @@ public class SpelExpressionParser {
         expressions = new InMemoryCache<>("el", cacheConfiguration);
     }
 
-    public CachedExpression parseAndCacheExpression(String expression) {
+    public CachedExpression parseAndCacheExpression(String expression, SpelTemplateContext templateContext) {
         CachedExpression exp = expressions.get(expression);
         if (exp != null) {
             return exp;
         }
 
-        exp = new CachedExpression(parseExpression(expression));
+        exp = new CachedExpression(parseExpression(expression), this, templateContext.knownDeferredVariablesName());
         expressions.put(expression, exp);
 
         return exp;
@@ -77,7 +78,7 @@ public class SpelExpressionParser {
         return PARSER_CONTEXT;
     }
 
-    private org.springframework.expression.spel.standard.SpelExpressionParser getParser() {
+    org.springframework.expression.spel.standard.SpelExpressionParser getParser() {
         if (expressionParser == null) {
             expressionParser =
                 new org.springframework.expression.spel.standard.SpelExpressionParser(

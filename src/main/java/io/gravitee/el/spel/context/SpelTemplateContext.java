@@ -24,9 +24,7 @@ import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.expression.EvaluationContext;
 
@@ -40,6 +38,7 @@ public class SpelTemplateContext implements TemplateContext {
     protected static final Method XPATH_EVAL_METHOD = BeanUtils.resolveSignature("evaluate", XPathFunction.class);
     private final EvaluationContext context;
     private Map<String, Object> deferredVariables;
+    private Map<String, Object> deferredFunctionsHolders;
 
     public SpelTemplateContext() {
         context = new SecuredEvaluationContext();
@@ -68,6 +67,16 @@ public class SpelTemplateContext implements TemplateContext {
     }
 
     @Override
+    public void setDeferredFunctionHolderVariable(String name, DeferredFunctionHolder deferredFunctionHolder) {
+        if (deferredFunctionsHolders == null) {
+            deferredFunctionsHolders = new HashMap<>();
+        }
+
+        deferredFunctionsHolders.put(name, deferredFunctionHolder);
+        setVariable(name, deferredFunctionHolder);
+    }
+
+    @Override
     public Object lookupVariable(String name) {
         return context.lookupVariable(name);
     }
@@ -86,6 +95,10 @@ public class SpelTemplateContext implements TemplateContext {
         }
 
         return Single.just(context);
+    }
+
+    public Set<String> knownDeferredVariablesName() {
+        return deferredFunctionsHolders != null ? deferredFunctionsHolders.keySet() : Collections.emptySet();
     }
 
     private boolean requiresDeferredVariable(CachedExpression expression, Map.Entry<String, Object> deferredEntry) {
