@@ -20,9 +20,13 @@ import io.gravitee.el.TemplateEngine;
 import io.gravitee.el.exceptions.ExpressionEvaluationException;
 import io.gravitee.el.spel.context.SpelTemplateContext;
 import io.reactivex.rxjava3.core.Maybe;
+import io.vertx.core.Context;
+import io.vertx.core.Vertx;
+import io.vertx.core.impl.VertxThread;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
-import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.util.StringUtils;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -50,12 +54,19 @@ public class SpelTemplateEngine implements TemplateEngine {
     }
 
     @Override
+    public <T> T evalBlocking(String expression, Class<T> clazz) {
+        final Context currentContext = Vertx.currentContext();
+        if (currentContext != null && currentContext.isEventLoopContext()) {
+            throw new ExpressionEvaluationException("Cannot evaluate expression " + expression + " on a vertx event loop");
+        }
+
+        return eval(expression, clazz).blockingGet();
+    }
+
+    @Override
     public <T> Maybe<T> eval(String expression, Class<T> clazz) {
         try {
-            CachedExpression cachedExpression = spelExpressionParser.parseAndCacheExpression(expression);
-            return templateContext
-                .evaluationContext(cachedExpression)
-                .flatMapMaybe(evaluationContext -> eval(cachedExpression, evaluationContext, clazz));
+            return eval(spelExpressionParser.parseAndCacheExpression(expression, templateContext), templateContext, clazz);
         } catch (Exception e) {
             return Maybe.error(e);
         }
@@ -66,14 +77,40 @@ public class SpelTemplateEngine implements TemplateEngine {
         return templateContext;
     }
 
-    protected <T> Maybe<T> eval(CachedExpression exp, EvaluationContext evaluationContext, Class<T> clazz) {
-        return Maybe.fromCallable(() -> eval(exp.getExpression(), evaluationContext, clazz));
+    @SuppressWarnings("unchecked")
+    protected <T> Maybe<T> eval(CachedExpression cachedExpression, SpelTemplateContext templateContext, Class<T> clazz) {
+        Expression expression;
+
+        cachedExpression
+            .expressionsToDefer()
+            .forEach((key, exp) ->
+                templateContext.setDeferredVariable(
+                    key,
+                    Maybe.defer(() ->
+                        eval(spelExpressionParser.parseAndCacheExpression("{" + exp + "}", templateContext), templateContext, Object.class)
+                    )
+                )
+            );
+
+        expression = cachedExpression.getExpression();
+
+        return templateContext
+            .evaluationContext(cachedExpression)
+            .flatMapMaybe(evaluationContext -> Maybe.fromCallable(() -> eval(expression, evaluationContext, clazz)))
+            .flatMap(result -> {
+                if (result instanceof Maybe maybeValue) {
+                    // If we end here, the deferred value isn't resolved yet.
+                    return maybeValue;
+                }
+
+                return Maybe.just(result);
+            });
     }
 
     protected <T> T eval(Expression expression, EvaluationContext evaluationContext, Class<T> clazz) {
         try {
             return expression.getValue(evaluationContext, clazz);
-        } catch (SpelEvaluationException spelEvaluationException) {
+        } catch (EvaluationException spelEvaluationException) {
             throw new ExpressionEvaluationException(expression.getExpressionString(), spelEvaluationException);
         }
     }

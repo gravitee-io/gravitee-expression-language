@@ -15,6 +15,7 @@
  */
 package io.gravitee.el.spel;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -69,11 +70,63 @@ public class CachedExpressionTest {
 
     @ParameterizedTest
     @MethodSource("provideExpressions")
-    void shouldExtractVariables(String expression, Set<String> expectedVariables) {
+    void should_extract_variables(String expression, Set<String> expectedVariables) {
         final Expression parseExpression = spelExpressionParser.parseExpression(expression);
-        final CachedExpression cachedExpression = new CachedExpression(parseExpression);
+        final CachedExpression cachedExpression = new CachedExpression(parseExpression, spelExpressionParser, Set.of());
 
         assertNotNull(cachedExpression.getExpression());
         assertEquals(expectedVariables, cachedExpression.getVariables());
+    }
+
+    private static Stream<Arguments> provideExpressionsWithDeferredFunctions() {
+        return Stream.of(
+            Arguments.of("{#deferHolder.get('val')}", Set.of("deferHolder"), "#deferHolder.get('val')"), // supports EL returning Rx object.
+            Arguments.of("{#deferHolder.get('val')}", Set.of(), "#deferHolder.get('val')"), // no deferred functions holder
+            Arguments.of("Hello {#deferHolder.get('val')}", Set.of("deferHolder"), "Hello {##_7fe56cf8d36e46bf4c034549c567ee78}"), // literal + deferred
+            Arguments.of("Hello {#deferHolder.get('val')}", Set.of(), "Hello {##deferHolder.get('val')}"), // no deferred functions holder
+            Arguments.of(
+                "{#deferHolder.get('val').contains('val')}",
+                Set.of("deferHolder"),
+                "#_7fe56cf8d36e46bf4c034549c567ee78.contains('val')"
+            ), // invoking method on a deferred functions holder
+            Arguments.of("{#deferHolder.get('val').contains('val')}", Set.of(), "#deferHolder.get('val').contains('val')"), // no deferred functions holder
+            Arguments.of(
+                "{#something.get(#deferHolder.get('val'))}",
+                Set.of("deferHolder"),
+                "#something.get(#_7fe56cf8d36e46bf4c034549c567ee78)"
+            ), // calling method with deferred as an argument
+            Arguments.of("{#something.get(#deferHolder.get('val'))}", Set.of(), "#something.get(#deferHolder.get('val'))"), // no deferred functions holder
+            Arguments.of(
+                "{#deferHolder.get('val')['X-Gravitee-Endpoint']}",
+                Set.of("deferHolder"),
+                "#_7fe56cf8d36e46bf4c034549c567ee78['X-Gravitee-Endpoint']"
+            ), // accessing index on deferred
+            Arguments.of("{#deferHolder.get('val')['X-Gravitee-Endpoint']}", Set.of(), "#deferHolder.get('val')['X-Gravitee-Endpoint']"), // no deferred function holder
+            Arguments.of(
+                "{('Hello'.contains(#deferHolder.get('val')))}",
+                Set.of("deferHolder"),
+                "('Hello'.contains(#_7fe56cf8d36e46bf4c034549c567ee78))"
+            ), // true -> literal + deferred
+            Arguments.of("{('Hello'.contains(#deferHolder.get('val')))}", Set.of(), "('Hello'.contains(#deferHolder.get('val')))"), // no deferred function holder
+            Arguments.of(
+                "{#something.get('val')[#deferHolder.getInt()]}",
+                Set.of("deferHolder"),
+                "#something.get('val')[#_ed0a6c6261eb18246015ef82deb2b5fb]"
+            ) // using deferred as an indexer.
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideExpressionsWithDeferredFunctions")
+    void should_detect_invocation_of_deferred_functions_holder(
+        String expression,
+        Set<String> deferredFunctionsHolderNames,
+        String expectedExpression
+    ) {
+        final Expression parseExpression = spelExpressionParser.parseExpression(expression);
+        final CachedExpression cachedExpression = new CachedExpression(parseExpression, spelExpressionParser, deferredFunctionsHolderNames);
+
+        assertNotNull(cachedExpression.getExpression());
+        assertThat(cachedExpression.getExpression().getExpressionString()).isEqualTo(expectedExpression);
     }
 }

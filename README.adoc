@@ -1,4 +1,3 @@
-
 = Gravitee Expression Language
 
 image:https://img.shields.io/badge/License-Apache%202.0-blue.svg["License", link="https://github.com/gravitee-io/gravitee-expression-language/blob/master/LICENSE.txt"]
@@ -6,7 +5,142 @@ image:https://img.shields.io/badge/semantic--release-conventional%20commits-e100
 image:https://circleci.com/gh/gravitee-io/gravitee-expression-language.svg?style=svg["CircleCI", link="https://circleci.com/gh/gravitee-io/gravitee-expression-language"]
 image:https://f.hubspotusercontent40.net/hubfs/7600448/gravitee-github-button.jpg["Join the community forum", link="https://community.gravitee.io?utm_source=readme", height=20]
 
-
 == Description
-This project provides a custom template engine that can be used to parse https://docs.gravitee.io/apim/3.x/apim_publisherguide_expression_language.html[Expression Language] elements.
 
+This project provides a custom template engine for parsing https://documentation.gravitee.io/apim/getting-started/gravitee-expression-language[Expression Language] elements.
+
+== Usage
+
+=== Basic Usage
+
+EL expressions can be evaluated using a `TemplateEngine` instance:
+
+[source,java]
+----
+TemplateEngine engine = TemplateEngine.templateEngine();
+----
+
+To pass variables to the `TemplateEngine`, use its context:
+
+[source,java]
+----
+TemplateEngine engine = TemplateEngine.templateEngine();
+TemplateContext context = engine.getTemplateContext();
+
+context.setVariable("myVar", "myValue");
+----
+
+The context remains available for any evaluated expression. You can evaluate an EL expression against your `TemplateEngine` instance. The first argument is the EL expression, and the second is the expected result type.
+
+[source,java]
+----
+TemplateEngine engine = TemplateEngine.templateEngine();
+TemplateContext context = engine.getTemplateContext();
+
+context.setVariable("myVar", "myValue");
+
+engine.evalNow("{#myVar}", String.class); // Result: "myValue"
+engine.evalNow("{#myVar.isEmpty()}", Boolean.class); // Result: false
+----
+
+IMPORTANT: Ensure the expected result type matches the evaluated expression.
+
+=== Calling Functions
+
+A variable can be of any type and may expose functions:
+
+[source,java]
+----
+// Assign a user variable.
+context.setVariable("myUser", new User("firstname", "lastname"));
+
+engine.eval("{#myUser.getDisplayName()}", String.class); // Calls getDisplayName() on the User instance.
+----
+
+IMPORTANT: You must explicitly declare the `User.getDisplayName()` function in the whitelist of authorized methods. See <<EL Sandbox>> for details.
+
+=== Reactive Usage
+
+To evaluate an EL expression reactively, use `eval()` instead of `evalNow()`.
+
+IMPORTANT: evalNow() is not strictly equivalent to `eval()` as it does not rely on reactive stack and does not support deferred variables or reactive functions. Hence, `evalNow()` is not suitable for advanced usages such as evaluating an expression based on the content of the request or response body (e.g: `{#request.content}`). However, `evalNow()` remains suitable when evaluating expressions outside a request processing (e.g. API or Security Domain deployment, connector initialization, ...).
+
+[source,java]
+----
+context.setVariable("myVar", "myValue");
+
+engine.eval("{#myVar}", String.class); // Returns Maybe<String>
+engine.eval("{#myVar.isEmpty()}", Boolean.class); // Returns Maybe<Boolean>
+----
+
+==== Deferred Variables
+
+The `TemplateEngine` allows assigning **deferred variables**, useful for injecting values that must be fetched before evaluation. A deferred variable can be a `Maybe` or a `Single`.
+
+[source,java]
+----
+// Assigns a variable from an HTTP call.
+context.setDeferredVariable("myVar", httpClient.fetch("https://somewhere.com").flatMap(result::message));
+
+engine.eval("{#myVar}", String.class); // Resolves myVar before evaluation.
+----
+
+TIP: A deferred variable is evaluated **only if used** in an expression. In the above example, `{#myVar}` triggers the HTTP call, while `{#anotherVar}` does not.
+
+==== Evaluating Functions Returning `Maybe` or `Single`
+
+If you need to evaluate a function that returns a `Maybe` or `Single`, you must inject a specific implementation of `DeferredFunctionHolder` in the context:
+
+[source,java]
+----
+import io.gravitee.el.spel.context.DeferredFunctionHolder;
+
+class MyDeferredFunctionHolder implements DeferredFunctionHolder {
+    public Maybe<String> resolve(String param) {
+        // ... return a Maybe.
+    }
+
+    public Maybe<String> doSomethingReactive() {
+        // ... return a Maybe.
+    }
+};
+
+// Assigns myHolder in the context.
+context.setDeferredFunctionHolderVariable("myHolder", new MyDeferredFunctionHolder());
+
+engine.eval("{#myHolder.resolve('something')}", String.class); // Handles the Maybe returned by the function call and evaluates the final string.
+
+engine.eval("{#myHolder.doSomethingReactive()}", String.class); // Handles the Maybe returned by the function call and evaluates the final string.
+----
+
+== EL Sandbox
+
+The EL Template Engine includes a built-in sandbox feature, allowing safe execution of EL expressions. The sandbox operates based on a predefined whitelist of allowed methods, fields, and constructors.
+
+=== Whitelist Configuration
+
+The sandbox provides the following configuration options:
+
+* `el.whitelist.mode`: Defines whether to `append` or `replace` the built-in whitelist.
+** `append` (default) - Adds new whitelisted definitions while keeping existing ones.
+** `replace` - Replaces the built-in list entirely (use with caution).
+
+  TIP: Always use `append` unless you are certain you need `replace`.
+
+* `el.whitelist.list`: Specifies additional methods, constructors, fields, or annotations to allow.
+** Prefix with `method` to allow a specific method (full signature required).
+** Prefix with `class` to allow an entire class (all methods, constructors, and fields will be accessible).
+
+==== Example Configuration
+
+[source,yaml]
+----
+el:
+  whitelist:
+    mode: append
+    list:
+      - method java.time.format.DateTimeFormatter ofLocalizedDate java.time.format.FormatStyle
+      - class java.time.format.DateTimeFormatter
+----
+
+WARNING: Be cautious when allowing entire classes or methods. Some classes may expose unintended methods, creating security risks.
