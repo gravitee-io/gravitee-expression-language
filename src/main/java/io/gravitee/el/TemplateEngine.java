@@ -16,7 +16,10 @@
 package io.gravitee.el;
 
 import io.gravitee.common.util.ServiceLoaderHelper;
+import io.gravitee.el.exceptions.ExpressionEvaluationException;
 import io.reactivex.rxjava3.core.Maybe;
+import io.vertx.core.Context;
+import io.vertx.core.Vertx;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -64,6 +67,7 @@ public interface TemplateEngine {
 
     /**
      * Evaluate the el expression against the current template context.
+     * <b>Warn</b>: <code>evalNow</code> does not support deferred variables and doesn't benefit from cache expression mechanism. Use {@link #eval(String, Class)} for reactive version that supports deferred variables.
      *
      * @param expression the el expression to evaluate.
      * @param clazz the class of the expected result .
@@ -76,6 +80,7 @@ public interface TemplateEngine {
 
     /**
      * Evaluate the el expression against the current template context in a reactive context.
+     * This method supports deferred variables and benefits from a cache of parsed expression.
      *
      * @param expression the el expression to evaluate.
      * @param clazz the class of the expected result .
@@ -84,6 +89,27 @@ public interface TemplateEngine {
      * @return a {@link Maybe} with the result of the evaluation or empty in case the evaluation returns <code>null</code>.
      */
     <T> Maybe<T> eval(String expression, Class<T> clazz);
+
+    /**
+     * Blocking evaluation of the el expression against the current template context in a reactive context.
+     * This method supports deferred variables and benefits from a cache of parsed expression.
+     * <b>Warn</b>: <code>evalBlocking</code> cannot be invoked on the eventloop. This is to avoid possible deadlock. In that case a {@link ExpressionEvaluationException} will be thrown.
+     *
+     *
+     * @param expression the el expression to evaluate.
+     * @param clazz the class of the expected result .
+     * @param <T> the expected result type.
+     *
+     * @return the result of the evaluation.
+     */
+    default <T> T evalBlocking(String expression, Class<T> clazz) throws ExpressionEvaluationException {
+        final Context currentContext = Vertx.currentContext();
+        if (currentContext != null && currentContext.isEventLoopContext()) {
+            throw new ExpressionEvaluationException("Cannot evaluate expression " + expression + " on a vertx event loop");
+        }
+
+        return eval(expression, clazz).blockingGet();
+    }
 
     /**
      * The context containing all the variables that can be used to evaluate the expressions.

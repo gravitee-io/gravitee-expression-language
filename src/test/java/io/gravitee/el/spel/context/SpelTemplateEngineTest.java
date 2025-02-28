@@ -28,14 +28,20 @@ import io.gravitee.el.TemplateEngine;
 import io.gravitee.el.exceptions.ExpressionEvaluationException;
 import io.gravitee.el.spel.EvaluableRequest;
 import io.gravitee.el.spel.Request;
+import io.gravitee.el.spel.TestDeferredFunctionHolder;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.context.SimpleExecutionContext;
 import io.gravitee.gateway.api.http.HttpHeaders;
 import io.reactivex.rxjava3.observers.TestObserver;
+import io.vertx.core.Vertx;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -68,7 +74,10 @@ class SpelTemplateEngineTest {
 
     @BeforeEach
     void init() {
-        reinitSecuredResolver(null);
+        ConfigurableEnvironment environment = new MockEnvironment()
+            .withProperty(EL_WHITELIST_MODE_KEY, "append")
+            .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "class io.gravitee.el.spel.TestDeferredFunctionHolder");
+        reinitSecuredResolver(environment);
     }
 
     @ParameterizedTest
@@ -311,6 +320,241 @@ class SpelTemplateEngineTest {
         content = "{#jsonPath(#request.content, '$.something')}";
         obs = engine.eval(content, String.class).test();
         obs.assertResult();
+    }
+
+    @Test
+    @SneakyThrows
+    void should_avoid_calling_eval_blocking_on_eventloop() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("name", "gravitee");
+
+        String content = "Hello {#name}";
+
+        CountDownLatch latch = new CountDownLatch(1);
+        Vertx
+            .vertx()
+            .runOnContext(v -> {
+                assertThrows(ExpressionEvaluationException.class, () -> engine.evalBlocking(content, String.class));
+                latch.countDown();
+            });
+
+        assertThat(latch.await(10, TimeUnit.SECONDS)).isEqualTo(true);
+    }
+
+    @Test
+    @SneakyThrows
+    void should_call_eval_blocking_when_not_on_eventloop() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("name", "gravitee");
+
+        String content = "Hello {#name}";
+
+        assertThat(engine.evalBlocking(content, String.class)).isEqualTo("Hello gravitee");
+    }
+
+    @Test
+    void should_call_literal() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("name", "gravitee");
+
+        String content = "Hello {#name}";
+
+        engine.eval(content, String.class).test().assertResult("Hello gravitee");
+    }
+
+    @Test
+    void should_evaluate_deferred_functions() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+
+        String content = "{#custom.get('val1', 'val2')}";
+
+        engine.eval(content, String.class).test().assertResult("resolved('val1', 'val2')");
+    }
+
+    @Test
+    void should_evaluate_deferred_functions_several_times() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+
+        String content = "{#custom.get('val1', 'val2')}";
+
+        for (int i = 0; i < 10; i++) {
+            engine.eval(content, String.class).test().assertResult("resolved('val1', 'val2')");
+        }
+    }
+
+    @Test
+    void should_evaluate_deferred_functions_with_delay() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder(200));
+
+        String content = "{#custom.get('val1', 'val2')}";
+
+        engine.eval(content, String.class).test().awaitDone(1, TimeUnit.SECONDS).assertResult("resolved('val1', 'val2')");
+    }
+
+    @Test
+    void should_evaluate_deferred_functions_with_list_index() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+
+        String content = "{#custom.getList('val1', 'val2')[0]}";
+
+        engine.eval(content, String.class).test().assertResult("resolved('val1')");
+    }
+
+    @Test
+    void should_evaluate_deferred_functions_with_list_and_el_as_index() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+        engine.getTemplateContext().setVariable("index", 0);
+
+        String content = "{#custom.getList('val1', 'val2')[#index]}";
+
+        engine.eval(content, String.class).test().assertResult("resolved('val1')");
+    }
+
+    @Test
+    void should_evaluate_deferred_functions_with_list_and_deferred_as_index() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+
+        String content = "{#custom.getList('val1', 'val2')[#custom.getIndex(0)]}";
+
+        engine.eval(content, String.class).test().assertResult("resolved('val1')");
+    }
+
+    @Test
+    void should_evaluate_list_with_deferred_as_index() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+
+        engine.getTemplateContext().setVariable("something", "resolved");
+
+        String content = "{#something.split(',')[#custom.getIndex(0)]}";
+
+        engine.eval(content, String.class).test().assertResult("resolved");
+    }
+
+    @Test
+    void should_evaluate_deferred_functions_with_el() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+        engine.getTemplateContext().setVariable("properties", Map.of("prop1", "val1", "prop2", "val2"));
+
+        String content = "{#custom.get(#properties['prop1'], #properties['prop2'])}";
+
+        engine.eval(content, String.class).test().assertResult("resolved('val1', 'val2')");
+    }
+
+    @Test
+    void should_evaluate_deferred_functions_in_a_literal() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+
+        String content = "Hello {#custom.get('val1', 'val2')}";
+
+        engine.eval(content, String.class).test().assertResult("Hello resolved('val1', 'val2')");
+    }
+
+    @Test
+    void should_evaluate_deferred_functions_in_a_literal_with_multi_el() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+
+        String content = "{#custom.get('val1','val2')} is not equals to {#custom.get('val3', 'val4')}";
+
+        engine.eval(content, String.class).test().assertResult("resolved('val1', 'val2') is not equals to resolved('val3', 'val4')");
+    }
+
+    @Test
+    void should_evaluate_deferred_functions_and_contains() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+
+        String content = "{#custom.get('val1', 'v2').contains('resolved')}";
+
+        engine.eval(content, Boolean.class).test().assertResult(true);
+    }
+
+    @Test
+    void should_evaluate_deferred_functions_with_contains_and_deferred_functions_argument() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+
+        String content = "{#custom.get('val1', 'val2').contains(#custom.get('val3', 'val4'))}";
+
+        engine.eval(content, Boolean.class).test().assertResult(false);
+    }
+
+    @Test
+    void should_evaluate_string_contains() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+
+        String content = "{('Hello'.contains('Hello'))}";
+
+        engine.eval(content, Boolean.class).test().assertResult(true);
+    }
+
+    @Test
+    void should_evaluate_string_contains_with_deferred_functions() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+
+        String content = "{('Hello'.contains(#custom.get('val1', 'val2')))}";
+
+        engine.eval(content, String.class).test().assertResult("false");
+    }
+
+    @Test
+    void should_evaluate_deferred_functions_with_complex_el() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+        engine
+            .getTemplateContext()
+            .setVariable(
+                "properties",
+                Map.of(
+                    "prop1",
+                    "val1",
+                    "prop2",
+                    "val2",
+                    "prop3",
+                    "val3",
+                    "prop4",
+                    "val4",
+                    "prop5",
+                    "val5",
+                    "prop6",
+                    "val6",
+                    "prop7",
+                    "val7",
+                    "prop8",
+                    "val8"
+                )
+            );
+
+        String content =
+            "{#custom.get(#custom.get(#properties['prop1'], #properties['prop2']), #custom.get(#properties['prop3'], #properties['prop4'])).concat(' ').concat(#custom.get(#custom.get(#properties['prop5'], #properties['prop6']), #custom.get(#properties['prop7'], #properties['prop8'])))}";
+
+        engine
+            .eval(content, String.class)
+            .test()
+            .assertResult(
+                "resolved('resolved('val1', 'val2')', 'resolved('val3', 'val4')') resolved('resolved('val5', 'val6')', 'resolved('val7', 'val8')')"
+            );
+    }
+
+    @Test
+    void should_evaluate_deferred_functions_with_type() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+
+        String content = "{ T(java.util.Base64).getEncoder().encodeToString(#custom.get('val1', 'val2').getBytes()) }";
+
+        engine.eval(content, String.class).test().assertResult("cmVzb2x2ZWQoJ3ZhbDEnLCAndmFsMicp");
     }
 
     @Test
@@ -631,14 +875,14 @@ class SpelTemplateEngineTest {
     }
 
     @Test
-    void shouldThrowParsingExceptionWithWrongExpression() {
+    void should_throw_parsing_exception_with_wrong_expression() {
         String wrongExpression = "{#";
         final TemplateEngine engine = TemplateEngine.templateEngine();
         engine.eval(wrongExpression, Boolean.class).test().assertFailure(ParseException.class);
     }
 
     @Test
-    void shouldGetFirstHeader() {
+    void should_get_first_header() {
         final List<CharSequence> values = new ArrayList<>();
         values.add("my_api_host");
         values.add("value2");
@@ -654,7 +898,7 @@ class SpelTemplateEngineTest {
     }
 
     @Test
-    void shouldConvertToSingleValueMap() {
+    void should_convert_to_single_value_map() {
         final List<CharSequence> values = new ArrayList<>();
         values.add("my_api_host");
         values.add("value2");
@@ -675,7 +919,7 @@ class SpelTemplateEngineTest {
     }
 
     @Test
-    void shouldHeadersContainsAllKeys() {
+    void should_headers_contains_all_keys() {
         final HttpHeaders headers = HttpHeaders.create().add("Header1", "value1").add("Header2", "value2");
         when(request.headers()).thenReturn(headers);
 
@@ -687,7 +931,7 @@ class SpelTemplateEngineTest {
     }
 
     @Test
-    void shouldGetValueAsBoolean() {
+    void should_get_value_as_boolean() {
         final HttpHeaders headers = HttpHeaders.create().add("X-Gravitee-Endpoint", "true");
 
         when(request.headers()).thenReturn(headers);
@@ -714,7 +958,7 @@ class SpelTemplateEngineTest {
     }
 
     @Test
-    void shouldEvaluateSimpleRegex() {
+    void should_evaluate_simple_regex() {
         String pathInfo = "/user";
         String regex = "^\\/user";
 
@@ -730,7 +974,7 @@ class SpelTemplateEngineTest {
     }
 
     @Test
-    void shouldEvaluateRegexWithQuantifiers() {
+    void should_evaluate_regex_with_quantifiers() {
         String pathInfo = "/user/01234567-abcd-abcd-abcd-012345678912/file";
         String regex = "^\\/user\\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(\\/file)?$";
 
@@ -758,7 +1002,7 @@ class SpelTemplateEngineTest {
             "{ \"status\": \"'{2}'\"  }",
         }
     )
-    void shouldEvaluateSimpleStringWithoutExpressions(String expression) {
+    void should_evaluate_simple_string_without_expressions(String expression) {
         final String evaluatedExpression = TemplateEngine.templateEngine().evalNow(expression, String.class);
         assertEquals(expression, evaluatedExpression);
     }
@@ -780,7 +1024,7 @@ class SpelTemplateEngineTest {
 
     @ParameterizedTest
     @MethodSource("expressionsWithoutVariables")
-    void shouldEvaluateStringWithExpression(String expression, String expectedResult) {
+    void should_evaluate_string_with_expression(String expression, String expectedResult) {
         final String evaluatedExpression = TemplateEngine.templateEngine().evalNow(expression, String.class);
         assertEquals(expectedResult, evaluatedExpression);
     }
@@ -802,12 +1046,43 @@ class SpelTemplateEngineTest {
 
     @ParameterizedTest
     @MethodSource("expressionsWithVariables")
-    void shouldEvaluateStringWithExpressionContainingVariables(String expression, String expectedResult) {
+    void should_evaluate_string_with_expression_containing_variables(String expression, String expectedResult) {
         lenient().when(request.pathInfo()).thenReturn("/my/path/A58");
         final TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
         final String evaluatedExpression = engine.evalNow(expression, String.class);
         assertEquals(expectedResult, evaluatedExpression);
+    }
+
+    private static Stream<Arguments> expressionsWithReturnType() {
+        return Stream.of(
+            Arguments.of("{#test.call()}", true, Boolean.class),
+            Arguments.of("{#test.call().isEmpty() == false}", "hello", Boolean.class),
+            Arguments.of("{#test.call()}", "hello", String.class),
+            Arguments.of("{#test.call()}", 123, Integer.class),
+            Arguments.of("{#test.call()}", 123L, Long.class),
+            Arguments.of("{#test.call()}", 12.3f, Float.class),
+            Arguments.of("{#test.call()}", (short) 1, Short.class),
+            Arguments.of("{#test.call()}", List.of("hello"), List.class),
+            Arguments.of("{#test.call()}", new String[] { "string" }, String[].class)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("expressionsWithReturnType")
+    void should_evaluate_with_expected_return_type(String expression, Object returnedValue, Class<?> expectedReturnType) {
+        ConfigurableEnvironment environment = new MockEnvironment()
+            .withProperty(EL_WHITELIST_MODE_KEY, "append")
+            .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "class io.gravitee.el.spel.context.MyFunctionWrapper");
+
+        reinitSecuredResolver(environment);
+
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+
+        engine.getTemplateContext().setVariable("test", new MyFunctionWrapper(returnedValue));
+
+        final Object evaluatedExpression = engine.evalNow(expression, expectedReturnType);
+        assertThat(evaluatedExpression.getClass()).isAssignableTo(expectedReturnType);
     }
 }

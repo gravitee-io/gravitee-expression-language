@@ -15,11 +15,15 @@
  */
 package io.gravitee.el.spel.jmh;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.gravitee.el.TemplateEngine;
 import io.gravitee.el.spel.SpelExpressionParser;
 import io.gravitee.el.spel.SpelTemplateEngine;
-import io.gravitee.gateway.api.http.HttpHeaders;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.openjdk.jmh.annotations.*;
 
 /**
@@ -28,30 +32,58 @@ import org.openjdk.jmh.annotations.*;
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
  * @author GraviteeSource Team
  */
-@BenchmarkMode(Mode.Throughput)
+@BenchmarkMode(Mode.All)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Benchmark)
 @Fork(value = 1)
 @Warmup(iterations = 2, time = 3)
 public class SpelTemplateEngineBenchmark {
 
-    private static final String EXPRESSION = "{#headers['X-Gravitee-Endpoint'] != null}";
+    private static String expression;
+
     private final TemplateEngine engine = new SpelTemplateEngine(new SpelExpressionParser());
 
     @Setup
     public void setup() {
-        final HttpHeaders headers = HttpHeaders.create();
-        headers.add("X-Gravitee-Endpoint", "value");
-        engine.getTemplateContext().setVariable("headers", headers);
+        int maxConditions = 10;
+        engine.getTemplateContext().setVariable("context", new Context(Map.of("application", "" + maxConditions)));
+
+        StringBuilder expressionBuilder = new StringBuilder("{");
+
+        for (int i = 0; i <= maxConditions; i++) {
+            if (i != 0) {
+                expressionBuilder.append(" || ");
+            }
+            expressionBuilder.append("#context.attributes['application'] == '").append(i).append("'");
+        }
+
+        expressionBuilder.append("}");
+
+        expression = expressionBuilder.toString();
+
+        // Sanity check.
+        assertThat(engine.evalNow(expression, Boolean.class)).isEqualTo(true);
+    }
+
+    @Getter
+    @AllArgsConstructor
+    private static class Context {
+
+        private final Map<String, String> attributes;
     }
 
     @Benchmark
-    public void engineNoCache() {
-        engine.getValue(EXPRESSION, Boolean.class);
+    public void engineEvalNow() {
+        engine.evalNow(expression, Boolean.class);
     }
 
     @Benchmark
-    public void engineWithCacheEval() {
-        engine.eval(EXPRESSION, Boolean.class).subscribe();
+    public void engineEvalBlocking() {
+        engine.evalBlocking(expression, Boolean.class);
+    }
+
+    @Benchmark
+    public void engineEval() {
+        engine.eval(expression, Boolean.class).subscribe();
     }
 }
