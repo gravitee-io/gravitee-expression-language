@@ -15,6 +15,7 @@
  */
 package io.gravitee.el;
 
+import io.gravitee.el.spel.context.DeferredFunctionHolder;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
@@ -36,7 +37,7 @@ public interface TemplateContext {
      * If the expression evaluated against this template context does not access the <code>name</code> variable, then the deferred variable will not be invoked.
      *
      * Specifying a {@link Completable} allows to define any custom action like populating attributes of an object added to the context (ex: request.content).
-     *  @param name the name of the variable.
+     * @param name the name of the variable.
      * @param deferred a {@link Completable} that will be called if and only if the variable <code>name</code> is accessed by the evaluated expression.
      */
     void setDeferredVariable(String name, Completable deferred);
@@ -44,17 +45,26 @@ public interface TemplateContext {
     /**
      * Same as {@link #setDeferredVariable(String, Completable)} but with a {@link Maybe}.
      * The value of the {@link Maybe} will be added to the context variable under the variable <code>name</code>.
-     *  @param name the name of the variable.
+     * @param name the name of the variable.
      * @param deferred a {@link Maybe} that will be called if and only if the variable <code>name</code> is accessed by the evaluated expression.
      */
     void setDeferredVariable(String name, Maybe<?> deferred);
 
     /**
      * Same as {@link #setDeferredVariable(String, Maybe)} but with a {@link Single}.
-     *  @param name the name of the variable.
+     * @param name the name of the variable.
      * @param deferred a {@link Single} that will be called if and only if the variable <code>name</code> is accessed by the evaluated expression.
      */
     void setDeferredVariable(String name, Single<?> deferred);
+
+    /**
+     * Set a deferred function holder variable. A {@link DeferredFunctionHolder} is an object that is known to expose one or more reactive methods.
+     * Such an object is simply an holder allowing access to a set of function returning a {@link Maybe} or a {@link Single} that needs to be resolved when evaluating the EL.
+     *
+     * @param name the name of the variable.
+     * @param deferredFunctionHolder an object exposing reactive function (e.g. returning {@link Maybe} or {@link Single}).
+     */
+    void setDeferredFunctionHolderVariable(String name, DeferredFunctionHolder deferredFunctionHolder);
 
     /**
      * Look up a named variable within this evaluation context.
