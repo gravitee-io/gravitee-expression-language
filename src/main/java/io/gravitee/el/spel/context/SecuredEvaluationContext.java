@@ -16,6 +16,7 @@
 package io.gravitee.el.spel.context;
 
 import java.util.*;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.*;
 import org.springframework.expression.spel.support.*;
 
@@ -25,7 +26,7 @@ import org.springframework.expression.spel.support.*;
  */
 public class SecuredEvaluationContext implements EvaluationContext {
 
-    // No constructor resolver to avoid object instantiation.
+    // Secured constructor resolver to only allow whitelisted constructors.
     private static final List<ConstructorResolver> constructorResolvers = Collections.singletonList(new SecuredContructorResolver());
 
     // Read only property access.
@@ -38,9 +39,15 @@ public class SecuredEvaluationContext implements EvaluationContext {
     // Secure method resolver to allow only whitelisted methods.
     private static final List<MethodResolver> methodResolvers = Collections.singletonList(new SecuredMethodResolver());
 
+    private static final DefaultConversionService conversionService = new DefaultConversionService();
+
+    static {
+        conversionService.addConverter(new ReactiveValueConverter());
+    }
+
     // Standards.
     private static final TypeLocator typeLocator = new StandardTypeLocator();
-    private static final TypeConverter typeConverter = new StandardTypeConverter();
+    private static final TypeConverter typeConverter = new StandardTypeConverter(conversionService);
     private static final TypeComparator typeComparator = new StandardTypeComparator();
     private static final OperatorOverloader operatorOverloader = new StandardOperatorOverloader();
 
