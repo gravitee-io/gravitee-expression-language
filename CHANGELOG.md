@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.4...4.1.0) (2025-03-18)
+
+
+### Features
+
+* add support for reactive functions ([181c028](https://github.com/gravitee-io/gravitee-expression-language/commit/181c0287bf438878b8bbbb5a6bf7786a3bd2d97c))
+
 ## [4.0.4](https://github.com/gravitee-io/gravitee-expression-language/compare/4.0.3...4.0.4) (2025-02-24)
 
 
