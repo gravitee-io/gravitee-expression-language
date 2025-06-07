@@ -34,7 +34,7 @@
     </parent>
 
     <properties>
-        <gravitee-bom.version>8.3.9</gravitee-bom.version>
+        <gravitee-bom.version>8.3.10</gravitee-bom.version>
         <json-smart.version>2.5.2</json-smart.version>
         <json-path.version>2.9.0</json-path.version>
         <gravitee-common.version>4.6.0</gravitee-common.version>
