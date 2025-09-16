@@ -15,6 +15,8 @@
  */
 package io.gravitee.el.exceptions;
 
+import org.springframework.core.NestedExceptionUtils;
+
 /**
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
  * @author GraviteeSource Team
@@ -26,6 +28,12 @@ public class ExpressionEvaluationException extends RuntimeException {
     }
 
     public ExpressionEvaluationException(String expression, Throwable cause) {
-        super("The template evaluation returns an error. Expression:\n" + expression, cause);
+        super("The template evaluation returns an error. Expression:\n" + expression, buildCause(expression, cause));
+    }
+
+    private static IllegalArgumentException buildCause(String expression, Throwable cause) {
+        Throwable throwable = NestedExceptionUtils.getMostSpecificCause(cause);
+        String message = throwable.getMessage();
+        return new IllegalArgumentException(String.format("Expression: %s failed with message %s", expression, message));
     }
 }
