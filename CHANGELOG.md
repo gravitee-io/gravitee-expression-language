@@ -1,3 +1,10 @@
+## [4.1.3](https://github.com/gravitee-io/gravitee-expression-language/compare/4.1.2...4.1.3) (2025-09-17)
+
+
+### Bug Fixes
+
+* handle eval exceptions to properly display error message ([f136fad](https://github.com/gravitee-io/gravitee-expression-language/commit/f136faddf66df02706a8ce5c2679451c0b24c736))
+
 ## [4.1.2](https://github.com/gravitee-io/gravitee-expression-language/compare/4.1.1...4.1.2) (2025-09-17)
 
 
