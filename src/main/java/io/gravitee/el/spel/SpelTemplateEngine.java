@@ -53,10 +53,8 @@ public class SpelTemplateEngine implements TemplateEngine {
     public <T> Maybe<T> eval(String expression, Class<T> clazz) {
         try {
             return eval(spelExpressionParser.parseAndCacheExpression(expression, templateContext), templateContext, clazz);
-        } catch (ExpressionEvaluationException e) {
-            return Maybe.error(e);
         } catch (Exception e) {
-            return Maybe.error(new ExpressionEvaluationException(expression, e));
+            return Maybe.error(e);
         }
     }
 
