@@ -31,7 +31,7 @@ public class ExpressionEvaluationException extends RuntimeException {
         super("The template evaluation returns an error. Expression:\n" + expression, buildCause(expression, cause));
     }
 
-    private static IllegalArgumentException buildCause(String expression, Throwable cause) {
+    public static IllegalArgumentException buildCause(String expression, Throwable cause) {
         Throwable throwable = NestedExceptionUtils.getMostSpecificCause(cause);
         String message = throwable.getMessage();
         return new IllegalArgumentException(String.format("Expression: %s failed with message %s", expression, message));
