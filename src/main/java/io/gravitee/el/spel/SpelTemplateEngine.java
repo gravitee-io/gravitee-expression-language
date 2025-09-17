@@ -15,6 +15,8 @@
  */
 package io.gravitee.el.spel;
 
+import static io.gravitee.el.exceptions.ExpressionEvaluationException.buildCause;
+
 import io.gravitee.el.TemplateContext;
 import io.gravitee.el.TemplateEngine;
 import io.gravitee.el.exceptions.ExpressionEvaluationException;
@@ -53,8 +55,10 @@ public class SpelTemplateEngine implements TemplateEngine {
     public <T> Maybe<T> eval(String expression, Class<T> clazz) {
         try {
             return eval(spelExpressionParser.parseAndCacheExpression(expression, templateContext), templateContext, clazz);
-        } catch (Exception e) {
+        } catch (ExpressionEvaluationException e) {
             return Maybe.error(e);
+        } catch (Exception e) {
+            return Maybe.error(buildCause(expression, e));
         }
     }
 
