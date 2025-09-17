@@ -878,7 +878,7 @@ class SpelTemplateEngineTest {
     void should_throw_parsing_exception_with_wrong_expression() {
         String wrongExpression = "{#";
         final TemplateEngine engine = TemplateEngine.templateEngine();
-        engine.eval(wrongExpression, Boolean.class).test().assertFailure(ExpressionEvaluationException.class);
+        engine.eval(wrongExpression, Boolean.class).test().assertFailure(ParseException.class);
     }
 
     @Test
