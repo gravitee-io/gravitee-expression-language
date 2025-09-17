@@ -1,3 +1,10 @@
+## [4.1.2](https://github.com/gravitee-io/gravitee-expression-language/compare/4.1.1...4.1.2) (2025-09-17)
+
+
+### Bug Fixes
+
+* revert eval error handling ([6161705](https://github.com/gravitee-io/gravitee-expression-language/commit/6161705b66385fb6117e22a03514c2ae68bfe958))
+
 ## [4.1.1](https://github.com/gravitee-io/gravitee-expression-language/compare/4.1.0...4.1.1) (2025-09-16)
 
 
