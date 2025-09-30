@@ -19,6 +19,7 @@ import io.gravitee.el.TemplateContext;
 import io.gravitee.el.spel.CachedExpression;
 import io.gravitee.el.spel.function.json.JsonPathFunction;
 import io.gravitee.el.spel.function.xml.XPathFunction;
+import io.gravitee.el.spel.function.xml.escape.XmlEscapeFunction;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -36,6 +37,7 @@ public class SpelTemplateContext implements TemplateContext {
 
     protected static final Method JSON_PATH_EVAL_METHOD = BeanUtils.resolveSignature("evaluate", JsonPathFunction.class);
     protected static final Method XPATH_EVAL_METHOD = BeanUtils.resolveSignature("evaluate", XPathFunction.class);
+    protected static final Method XML_ESCAPE_EVAL_METHOD = BeanUtils.resolveSignature("evaluate", XmlEscapeFunction.class);
     private final EvaluationContext context;
     private Map<String, Object> deferredVariables;
     private Map<String, Object> deferredFunctionsHolders;
@@ -44,6 +46,7 @@ public class SpelTemplateContext implements TemplateContext {
         context = new SecuredEvaluationContext();
         context.setVariable("jsonPath", JSON_PATH_EVAL_METHOD);
         context.setVariable("xpath", XPATH_EVAL_METHOD);
+        context.setVariable("xmlEscape", XML_ESCAPE_EVAL_METHOD);
     }
 
     @Override

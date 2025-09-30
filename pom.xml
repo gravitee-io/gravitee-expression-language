@@ -90,6 +90,13 @@
             <version>${json-smart.version}</version>
         </dependency>
 
+        <!-- Apache Commons Text for XML escaping -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.14.0</version>
+        </dependency>
+
         <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
