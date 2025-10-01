@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/gravitee-io/gravitee-expression-language/compare/4.1.3...4.2.0) (2025-10-01)
+
+
+### Features
+
+* Add `XmlEscapeFunction` for XML content escaping ([b086143](https://github.com/gravitee-io/gravitee-expression-language/commit/b0861437b4c8ee61a27322dabc99d1fe6b82de27))
+
 ## [4.1.3](https://github.com/gravitee-io/gravitee-expression-language/compare/4.1.2...4.1.3) (2025-09-17)
 
 
