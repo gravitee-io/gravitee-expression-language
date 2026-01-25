@@ -17,6 +17,7 @@ package io.gravitee.el.spel;
 
 import io.gravitee.el.spel.context.DeferredFunctionHolder;
 import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Single;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -36,8 +37,8 @@ public class TestDeferredFunctionHolder implements DeferredFunctionHolder {
         this.delay = delay;
     }
 
-    public Maybe<Integer> getIndex(int index) {
-        return Maybe.just(index);
+    public Single<Integer> getIndex(int index) {
+        return Single.just(index);
     }
 
     public Maybe<String> get(String val1, String val2) {

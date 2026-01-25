@@ -22,6 +22,7 @@ import io.gravitee.el.TemplateEngine;
 import io.gravitee.el.exceptions.ExpressionEvaluationException;
 import io.gravitee.el.spel.context.SpelTemplateContext;
 import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Single;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
@@ -91,6 +92,9 @@ public class SpelTemplateEngine implements TemplateEngine {
                 if (result instanceof Maybe maybeValue) {
                     // If we end here, the deferred value isn't resolved yet.
                     return maybeValue;
+                } else if (result instanceof Single singleValue) {
+                    // If we end here, the deferred value isn't resolved yet.
+                    return singleValue.toMaybe();
                 }
 
                 return Maybe.just(result);
