@@ -558,6 +558,16 @@ class SpelTemplateEngineTest {
     }
 
     @Test
+    void should_evaluate_deferred_function_returning_single() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setDeferredFunctionHolderVariable("custom", new TestDeferredFunctionHolder());
+
+        String content = "{#custom.getIndex(0)}";
+
+        engine.eval(content, Integer.class).test().assertResult(0);
+    }
+
+    @Test
     void should_check_request_content_function() {
         EvaluableRequest req = Mockito.mock(EvaluableRequest.class);
         when(req.getContent()).thenReturn("pong\n");
