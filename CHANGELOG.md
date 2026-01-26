@@ -1,3 +1,10 @@
+## [4.2.1](https://github.com/gravitee-io/gravitee-expression-language/compare/4.2.0...4.2.1) (2026-01-26)
+
+
+### Bug Fixes
+
+* support Single return type for deferred functions ([e6f989b](https://github.com/gravitee-io/gravitee-expression-language/commit/e6f989b984a752baaf67993587941982624f118e))
+
 # [4.2.0](https://github.com/gravitee-io/gravitee-expression-language/compare/4.1.3...4.2.0) (2025-10-01)
 
 
