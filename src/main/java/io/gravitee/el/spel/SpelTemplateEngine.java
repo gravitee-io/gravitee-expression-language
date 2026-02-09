@@ -42,6 +42,14 @@ public class SpelTemplateEngine implements TemplateEngine {
         this.templateContext = new SpelTemplateContext();
     }
 
+    public SpelTemplateEngine(TemplateEngine templateEngine) {
+        if (!(templateEngine instanceof SpelTemplateEngine other)) {
+            throw new IllegalArgumentException("TemplateEngine must be an instance of SpelTemplateEngine to be duplicated.");
+        }
+        this.spelExpressionParser = other.spelExpressionParser;
+        this.templateContext = new SpelTemplateContext(other.templateContext);
+    }
+
     @Override
     public <T> T getValue(String expression, Class<T> clazz) {
         return evalNow(expression, clazz);

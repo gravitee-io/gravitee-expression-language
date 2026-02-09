@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import io.gravitee.common.util.LinkedMultiValueMap;
 import io.gravitee.common.util.MultiValueMap;
+import io.gravitee.el.TemplateContext;
 import io.gravitee.el.TemplateEngine;
 import io.gravitee.el.exceptions.ExpressionEvaluationException;
 import io.gravitee.el.spel.EvaluableRequest;
@@ -32,6 +33,7 @@ import io.gravitee.el.spel.TestDeferredFunctionHolder;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.context.SimpleExecutionContext;
 import io.gravitee.gateway.api.http.HttpHeaders;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.observers.TestObserver;
 import io.vertx.core.Vertx;
 import java.util.*;
@@ -1094,5 +1096,31 @@ class SpelTemplateEngineTest {
 
         final Object evaluatedExpression = engine.evalNow(expression, expectedReturnType);
         assertThat(evaluatedExpression.getClass()).isAssignableTo(expectedReturnType);
+    }
+
+    @Test
+    void should_create_template_engine_from_another_template_engine() {
+        TestDeferredFunctionHolder deferredFunctionHolder = new TestDeferredFunctionHolder();
+        Maybe<String> defferedValue = Maybe.just("defferedValue");
+
+        final TemplateEngine originalEngine = TemplateEngine.templateEngine();
+        final SpelTemplateContext originalTemplateContext = (SpelTemplateContext) originalEngine.getTemplateContext();
+        originalTemplateContext.setVariable("test", "hello");
+        originalTemplateContext.setDeferredFunctionHolderVariable("defferedFunction", deferredFunctionHolder);
+        originalTemplateContext.setDeferredVariable("defferedVariable", defferedValue);
+
+        final TemplateEngine clonedEngine = TemplateEngine.fromTemplateEngine(originalEngine);
+        SpelTemplateContext clonedTemplateContext = (SpelTemplateContext) clonedEngine.getTemplateContext();
+
+        assertThat(clonedEngine).isNotSameAs(originalEngine);
+        assertThat(clonedTemplateContext).isNotSameAs(originalTemplateContext);
+        assertThat(clonedTemplateContext.getVariables()).isNotSameAs(originalTemplateContext.getVariables());
+        assertThat(clonedTemplateContext.getDeferredVariables()).isNotSameAs(originalTemplateContext.getDeferredVariables());
+        assertThat(clonedTemplateContext.getDeferredFunctionsHolders()).isNotSameAs(originalTemplateContext.getDeferredFunctionsHolders());
+
+        assertThat(clonedTemplateContext.getVariables())
+            .contains(Map.entry("test", "hello"), Map.entry("defferedFunction", deferredFunctionHolder));
+        assertThat(clonedTemplateContext.getDeferredVariables()).contains(Map.entry("defferedVariable", defferedValue));
+        assertThat(clonedTemplateContext.getDeferredFunctionsHolders()).contains(Map.entry("defferedFunction", deferredFunctionHolder));
     }
 }
