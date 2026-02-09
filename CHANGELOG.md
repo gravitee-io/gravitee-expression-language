@@ -1,3 +1,10 @@
+# [4.3.0](https://github.com/gravitee-io/gravitee-expression-language/compare/4.2.1...4.3.0) (2026-02-09)
+
+
+### Features
+
+* allow to duplicate a template engine ([225bb16](https://github.com/gravitee-io/gravitee-expression-language/commit/225bb1630cdb89715c63391d8d38bc26ccf11b76))
+
 ## [4.2.1](https://github.com/gravitee-io/gravitee-expression-language/compare/4.2.0...4.2.1) (2026-01-26)
 
 
