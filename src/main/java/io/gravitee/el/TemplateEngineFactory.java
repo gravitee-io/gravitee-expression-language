@@ -20,4 +20,6 @@ package io.gravitee.el;
  */
 public interface TemplateEngineFactory {
     TemplateEngine templateEngine();
+
+    TemplateEngine fromTemplateEngine(TemplateEngine templateEngine);
 }

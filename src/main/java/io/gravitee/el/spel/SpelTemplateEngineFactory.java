@@ -29,4 +29,9 @@ public class SpelTemplateEngineFactory implements TemplateEngineFactory {
     public TemplateEngine templateEngine() {
         return new SpelTemplateEngine(EXPRESSION_PARSER);
     }
+
+    @Override
+    public TemplateEngine fromTemplateEngine(TemplateEngine templateEngine) {
+        return new SpelTemplateEngine(templateEngine);
+    }
 }

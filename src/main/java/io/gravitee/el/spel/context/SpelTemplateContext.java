@@ -49,6 +49,17 @@ public class SpelTemplateContext implements TemplateContext {
         context.setVariable("xmlEscape", XML_ESCAPE_EVAL_METHOD);
     }
 
+    public SpelTemplateContext(SpelTemplateContext templateContext) {
+        this();
+        if (templateContext.deferredVariables != null) {
+            this.deferredVariables = new HashMap<>(templateContext.deferredVariables);
+        }
+        if (templateContext.deferredFunctionsHolders != null) {
+            this.deferredFunctionsHolders = new HashMap<>(templateContext.deferredFunctionsHolders);
+        }
+        ((SecuredEvaluationContext) context).putVariables(new HashMap<>(templateContext.getVariables()));
+    }
+
     @Override
     public void setVariable(String name, Object value) {
         context.setVariable(name, value);
@@ -131,5 +142,17 @@ public class SpelTemplateContext implements TemplateContext {
         }
 
         deferredVariables.put(name, deferred);
+    }
+
+    Map<String, Object> getVariables() {
+        return ((SecuredEvaluationContext) this.context).getVariables();
+    }
+
+    Map<String, Object> getDeferredVariables() {
+        return deferredVariables;
+    }
+
+    Map<String, Object> getDeferredFunctionsHolders() {
+        return deferredFunctionsHolders;
     }
 }

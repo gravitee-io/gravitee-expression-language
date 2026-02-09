@@ -115,4 +115,12 @@ public class SecuredEvaluationContext implements EvaluationContext {
     public Object lookupVariable(String name) {
         return this.variables.get(name);
     }
+
+    void putVariables(Map<String, Object> variables) {
+        this.variables.putAll(variables);
+    }
+
+    Map<String, Object> getVariables() {
+        return this.variables;
+    }
 }

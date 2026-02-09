@@ -38,6 +38,16 @@ public interface TemplateEngine {
     }
 
     /**
+     * Creates a {@link TemplateEngine} instance from an existing one. The goal is to share the same variables.
+     *
+     * @param templateEngine the template engine to copy variables from
+     * @return a {@link TemplateEngine} instance for single use.
+     */
+    static TemplateEngine fromTemplateEngine(TemplateEngine templateEngine) {
+        return factory.fromTemplateEngine(templateEngine);
+    }
+
+    /**
      * @deprecated this method is deprecated in favor of {@link #eval(String, Class)} that supports reactive.
      * Evaluate the el expression against the current template context.
      *
