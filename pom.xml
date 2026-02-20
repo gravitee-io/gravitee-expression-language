@@ -41,7 +41,7 @@
         <gravitee-gateway-api.version>3.11.1</gravitee-gateway-api.version>
         <jmh.version>1.37</jmh.version>
         <bcpkix-jdk18on.version>1.81</bcpkix-jdk18on.version>
-        <gravitee-node.version>7.0.7</gravitee-node.version>
+        <gravitee-node.version>7.23.0</gravitee-node.version>
         <guava.version>33.4.8-jre</guava.version>
     </properties>
 
