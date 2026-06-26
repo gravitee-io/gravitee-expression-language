@@ -18,31 +18,25 @@ package io.gravitee.el.spel.function.xml.escape;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.gravitee.el.TemplateEngine;
-import io.gravitee.el.spel.context.SecuredContructorResolver;
-import io.gravitee.el.spel.context.SecuredMethodResolver;
-import io.gravitee.el.spel.context.SecuredResolver;
+import io.gravitee.el.exceptions.ExpressionEvaluationException;
+import io.gravitee.el.spel.context.SecuredResolverTestInitializer;
 import io.reactivex.rxjava3.observers.TestObserver;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class XmlEscapeFunctionTest {
 
     @BeforeEach
     void setUp() {
-        reinitSecuredResolver();
-    }
-
-    private void reinitSecuredResolver() {
-        ReflectionTestUtils.setField(SecuredResolver.class, "instance", null);
-        SecuredResolver.initialize(null);
-
-        SecuredResolver instance = ReflectionTestUtils.invokeMethod(SecuredResolver.class, "getInstance");
-        ReflectionTestUtils.setField(SecuredMethodResolver.class, "securedResolver", instance);
-        ReflectionTestUtils.setField(SecuredContructorResolver.class, "securedResolver", instance);
+        SecuredResolverTestInitializer.reinit();
     }
 
     @Test
@@ -84,13 +78,18 @@ class XmlEscapeFunctionTest {
         assertThat(obs.values()).isEmpty();
     }
 
-    @Test
-    void should_handle_empty_string_in_el() {
+    @ParameterizedTest
+    @ValueSource(strings = { "", "   " })
+    void should_leave_blank_and_empty_strings_unchanged_in_el(String input) {
         TemplateEngine engine = TemplateEngine.templateEngine();
-        TestObserver<String> obs = engine.eval("{#xmlEscape(\"\")}", String.class).test();
+        TestObserver<String> obs = engine.eval("{#xmlEscape('" + input + "')}", String.class).test();
         obs.assertComplete();
-        String result = obs.values().get(0);
-        assertThat(result).isEmpty();
+        assertThat(obs.values().get(0)).isEqualTo(input);
+    }
+
+    @Test
+    void should_return_blank_string_unchanged() {
+        assertThat(XmlEscapeFunction.evaluate("   ")).isEqualTo("   ");
     }
 
     @Test
@@ -209,5 +208,46 @@ class XmlEscapeFunctionTest {
         String result = XmlEscapeFunction.evaluate(injectionPayload);
 
         assertThat(result).isEqualTo("1&lt;/web:id&gt;&lt;web:id&gt;2").doesNotContain("<", ">").contains("&lt;", "&gt;");
+    }
+
+    @ParameterizedTest
+    @MethodSource("primitiveArrays")
+    void should_handle_primitive_array(Object input, String expected) {
+        assertThat(XmlEscapeFunction.evaluate(input)).isEqualTo(expected);
+    }
+
+    static Stream<Arguments> primitiveArrays() {
+        return Stream.of(Arguments.of(new int[] { 1, 2 }, "1 2"), Arguments.of(new boolean[] { true, false }, "true false"));
+    }
+
+    @Test
+    void should_handle_primitive_char_array_with_xml_special_chars() {
+        assertThat(XmlEscapeFunction.evaluate(new char[] { '<', '&', '>' })).isEqualTo("&lt; &amp; &gt;");
+    }
+
+    @Test
+    void should_reject_non_whitelisted_argument() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine
+            .eval("{#xmlEscape(T(java.lang.Runtime).getRuntime())}", String.class)
+            .test()
+            .assertError(ExpressionEvaluationException.class);
+    }
+
+    @Test
+    void should_allow_whitelisted_argument() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.eval("{#xmlEscape(T(java.lang.Math).abs(-42))}", String.class).test().assertResult("42");
+    }
+
+    @ParameterizedTest
+    @MethodSource("wrongArityExpressions")
+    void should_error_on_wrong_arity(String expression) {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.eval(expression, String.class).test().assertError(Exception.class);
+    }
+
+    static Stream<Arguments> wrongArityExpressions() {
+        return Stream.of(Arguments.of("{#xmlEscape()}"), Arguments.of("{#xmlEscape('a','b')}"));
     }
 }

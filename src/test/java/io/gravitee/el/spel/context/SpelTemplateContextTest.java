@@ -53,9 +53,11 @@ class SpelTemplateContextTest {
     }
 
     @Test
-    void shouldHaveDefaultJsonPathAndXPathVariables() {
+    void shouldHaveAllBuiltInFunctionVariables() {
         assertNotNull(cut.lookupVariable("jsonPath"));
         assertNotNull(cut.lookupVariable("xpath"));
+        assertNotNull(cut.lookupVariable("xmlEscape"));
+        assertNotNull(cut.lookupVariable("jsonEscape"));
     }
 
     @Test
