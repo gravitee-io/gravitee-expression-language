@@ -61,7 +61,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.expression.ParseException;
 import org.springframework.mock.env.MockEnvironment;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -735,6 +734,31 @@ class SpelTemplateEngineTest {
     }
 
     @Test
+    void should_allow_registered_el_function_when_built_in_whitelist_not_loaded() {
+        ConfigurableEnvironment environment = new MockEnvironment()
+            .withProperty(EL_WHITELIST_MODE_KEY, "replace")
+            .withProperty(EL_WHITELIST_LIST_KEY + "[0]", "method java.lang.System getenv");
+
+        reinitSecuredResolver(environment);
+
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("input", "hello \"world\"");
+
+        assertThat(engine.evalNow("{#jsonEscape(#input)}", String.class)).isEqualTo("hello \\\"world\\\"");
+        assertThat(engine.evalNow("{#xmlEscape(#input)}", String.class)).isEqualTo("hello &quot;world&quot;");
+    }
+
+    @Test
+    void should_not_allow_direct_type_call_to_escape_function() {
+        final TemplateEngine engine = TemplateEngine.templateEngine();
+
+        final TestObserver<Object> obs = engine
+            .eval("{T(io.gravitee.el.spel.function.json.escape.JsonEscapeFunction).evaluate('test')}", Object.class)
+            .test();
+        obs.assertError(ExpressionEvaluationException.class);
+    }
+
+    @Test
     void should_ignore_unknown_whitelisted_classes_or_methods() {
         ConfigurableEnvironment environment = new MockEnvironment()
             .withProperty(EL_WHITELIST_MODE_KEY, "append")
@@ -879,11 +903,7 @@ class SpelTemplateEngineTest {
     }
 
     private void reinitSecuredResolver(Environment environment) {
-        ReflectionTestUtils.setField(SecuredResolver.class, "instance", null);
-        SecuredResolver.initialize(environment);
-
-        ReflectionTestUtils.setField(SecuredMethodResolver.class, "securedResolver", SecuredResolver.getInstance());
-        ReflectionTestUtils.setField(SecuredContructorResolver.class, "securedResolver", SecuredResolver.getInstance());
+        SecuredResolverTestInitializer.reinit(environment);
     }
 
     @Test
@@ -1122,5 +1142,134 @@ class SpelTemplateEngineTest {
             .contains(Map.entry("test", "hello"), Map.entry("defferedFunction", deferredFunctionHolder));
         assertThat(clonedTemplateContext.getDeferredVariables()).contains(Map.entry("defferedVariable", defferedValue));
         assertThat(clonedTemplateContext.getDeferredFunctionsHolders()).contains(Map.entry("defferedFunction", deferredFunctionHolder));
+    }
+
+    @Test
+    void should_evaluate_built_in_escape_functions_on_a_cloned_engine() {
+        final TemplateEngine originalEngine = TemplateEngine.templateEngine();
+
+        final TemplateEngine clonedEngine = TemplateEngine.fromTemplateEngine(originalEngine);
+
+        clonedEngine.eval("{#jsonEscape('\"')}", String.class).test().assertResult("\\\"");
+        clonedEngine.eval("{#xmlEscape('<')}", String.class).test().assertResult("&lt;");
+    }
+
+    @Test
+    void should_evaluate_a_variable_copied_from_the_original_on_a_cloned_engine() {
+        final TemplateEngine originalEngine = TemplateEngine.templateEngine();
+        originalEngine.getTemplateContext().setVariable("payload", "val\"ue");
+
+        final TemplateEngine clonedEngine = TemplateEngine.fromTemplateEngine(originalEngine);
+
+        clonedEngine.eval("{#jsonEscape(#payload)}", String.class).test().assertResult("val\\\"ue");
+    }
+
+    @Test
+    void should_not_affect_the_original_when_mutating_a_variable_on_the_clone() {
+        final TemplateEngine originalEngine = TemplateEngine.templateEngine();
+        originalEngine.getTemplateContext().setVariable("payload", "val\"ue");
+        final TemplateEngine clonedEngine = TemplateEngine.fromTemplateEngine(originalEngine);
+
+        clonedEngine.getTemplateContext().setVariable("payload", "changed");
+
+        assertThat(originalEngine.getTemplateContext().lookupVariable("payload")).isEqualTo("val\"ue");
+    }
+
+    @Test
+    void should_json_escape_a_context_variable() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("userInput", "say \"hello\"");
+
+        final TestObserver<String> obs = engine.eval("{#jsonEscape(#userInput)}", String.class).test();
+        obs.assertResult("say \\\"hello\\\"");
+    }
+
+    @Test
+    void should_emit_nothing_when_json_escaping_a_null_context_variable() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("userInput", null);
+
+        final TestObserver<String> obs = engine.eval("{#jsonEscape(#userInput)}", String.class).test();
+        obs.assertComplete();
+        assertThat(obs.values()).isEmpty();
+    }
+
+    @Test
+    void should_xml_escape_a_context_variable() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("xml", "<b>a & b</b>");
+
+        final TestObserver<String> obs = engine.eval("{#xmlEscape(#xml)}", String.class).test();
+        obs.assertResult("&lt;b&gt;a &amp; b&lt;/b&gt;");
+    }
+
+    @Test
+    void should_emit_nothing_when_xml_escaping_a_null_context_variable() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("xml", null);
+
+        final TestObserver<String> obs = engine.eval("{#xmlEscape(#xml)}", String.class).test();
+        obs.assertComplete();
+        assertThat(obs.values()).isEmpty();
+    }
+
+    @Test
+    void should_json_escape_the_result_of_xml_escape_when_nested() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        final TestObserver<String> obs = engine.eval("{#jsonEscape(#xmlEscape('<b>\"hi\"</b>'))}", String.class).test();
+        obs.assertResult("&lt;b&gt;&quot;hi&quot;&lt;\\/b&gt;");
+    }
+
+    @Test
+    void should_xml_escape_the_result_of_json_escape_when_nested() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        final TestObserver<String> obs = engine.eval("{#xmlEscape(#jsonEscape('\"hello\"'))}", String.class).test();
+        obs.assertResult("\\&quot;hello\\&quot;");
+    }
+
+    @Test
+    void should_json_escape_twice_when_double_nested() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        final TestObserver<String> obs = engine.eval("{#jsonEscape(#jsonEscape('\"'))}", String.class).test();
+        obs.assertResult("\\\\\\\"");
+    }
+
+    @Test
+    void should_json_escape_a_literal_via_eval_now() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        assertThat(engine.evalNow("{#jsonEscape('say \"hi\"')}", String.class)).isEqualTo("say \\\"hi\\\"");
+    }
+
+    @Test
+    void should_xml_escape_a_literal_via_eval_now() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        assertThat(engine.evalNow("{#xmlEscape('<tag>')}", String.class)).isEqualTo("&lt;tag&gt;");
+    }
+
+    @Test
+    void should_return_null_when_json_escaping_null_via_eval_now() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        assertThat(engine.evalNow("{#jsonEscape(null)}", String.class)).isNull();
+    }
+
+    @Test
+    void should_return_null_when_xml_escaping_null_via_eval_now() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+
+        assertThat(engine.evalNow("{#xmlEscape(null)}", String.class)).isNull();
+    }
+
+    @Test
+    void should_json_escape_a_context_variable_via_eval_now() {
+        TemplateEngine engine = TemplateEngine.templateEngine();
+        engine.getTemplateContext().setVariable("msg", "say \"hi\"");
+
+        assertThat(engine.evalNow("{#jsonEscape(#msg)}", String.class)).isEqualTo("say \\\"hi\\\"");
     }
 }

@@ -15,6 +15,7 @@
  */
 package io.gravitee.el.spel.function.xml.escape;
 
+import io.gravitee.el.spel.function.EscapeFunctionUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
 /**
@@ -58,7 +59,7 @@ public final class XmlEscapeFunction {
      * <p>This method handles different input types:</p>
      * <ul>
      *   <li>{@code String} - used directly (most common case)</li>
-     *   <li>{@code Collection/Array} - takes first element if single element, joins with space if multiple</li>
+     *   <li>{@code Collection/Array} - elements joined with space</li>
      *   <li>{@code Number} - converted to string via {@code toString()}</li>
      *   <li>{@code Boolean} - converted to string via {@code toString()}</li>
      *   <li>{@code null} - returns {@code null}</li>
@@ -83,35 +84,6 @@ public final class XmlEscapeFunction {
         if (input == null) {
             return null;
         }
-
-        String text;
-        if (input instanceof String stringInput) {
-            text = stringInput;
-        } else if (input instanceof java.util.Collection<?> collection) {
-            text =
-                switch (collection.size()) {
-                    case 0 -> "";
-                    case 1 -> {
-                        Object firstElement = collection.iterator().next();
-                        yield firstElement != null ? firstElement.toString() : "";
-                    }
-                    default -> String.join(" ", collection.stream().map(obj -> obj != null ? obj.toString() : "").toArray(String[]::new));
-                };
-        } else if (input.getClass().isArray()) {
-            Object[] array = (Object[]) input;
-            text =
-                switch (array.length) {
-                    case 0 -> "";
-                    case 1 -> array[0] != null ? array[0].toString() : "";
-                    default -> String.join(
-                        " ",
-                        java.util.Arrays.stream(array).map(element -> element != null ? element.toString() : "").toArray(String[]::new)
-                    );
-                };
-        } else {
-            text = input.toString();
-        }
-
-        return StringEscapeUtils.escapeXml10(text);
+        return StringEscapeUtils.escapeXml10(EscapeFunctionUtils.normalizeToText(input));
     }
 }
