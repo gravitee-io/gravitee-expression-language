@@ -1,3 +1,10 @@
+# [4.4.0](https://github.com/gravitee-io/gravitee-expression-language/compare/4.3.0...4.4.0) (2026-06-29)
+
+
+### Features
+
+* add #jsonEscape EL helper for JSON-safe string substitution ([#152](https://github.com/gravitee-io/gravitee-expression-language/issues/152)) ([67d1a55](https://github.com/gravitee-io/gravitee-expression-language/commit/67d1a5568ba14e13c1c2e4316588ac56f5bf7cdd))
+
 # [4.3.0](https://github.com/gravitee-io/gravitee-expression-language/compare/4.2.1...4.3.0) (2026-02-09)
 
 
