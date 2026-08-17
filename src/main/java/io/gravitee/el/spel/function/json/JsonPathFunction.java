@@ -16,11 +16,11 @@
 package io.gravitee.el.spel.function.json;
 
 import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.ParseContext;
 import com.jayway.jsonpath.Predicate;
-import com.jayway.jsonpath.spi.cache.CacheProvider;
-import com.jayway.jsonpath.spi.cache.NOOPCache;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,25 +35,36 @@ import java.io.InputStream;
  */
 public final class JsonPathFunction {
 
-    private static final Configuration CONFIGURATION;
-
-    static {
-        Configuration configuration = Configuration.defaultConfiguration();
-        CONFIGURATION = configuration.addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
-        CacheProvider.setCache(new NOOPCache());
-    }
+    private static final Configuration CONFIGURATION = Configuration.defaultConfiguration().addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
 
     private JsonPathFunction() {}
 
     public static <T> T evaluate(Object json, String jsonPath, Predicate... predicates) throws IOException {
+        final ParseContext parseContext = JsonPath.using(CONFIGURATION);
+        final DocumentContext document;
+
         if (json instanceof String) {
-            return JsonPath.using(CONFIGURATION).parse((String) json).read(jsonPath, predicates);
+            document = parseContext.parse((String) json);
         } else if (json instanceof File) {
-            return JsonPath.using(CONFIGURATION).parse((File) json).read(jsonPath, predicates);
+            document = parseContext.parse((File) json);
         } else if (json instanceof InputStream) {
-            return JsonPath.using(CONFIGURATION).parse((InputStream) json).read(jsonPath, predicates);
+            document = parseContext.parse((InputStream) json);
         } else {
-            return JsonPath.using(CONFIGURATION).parse(json).read(jsonPath, predicates);
+            document = parseContext.parse(json);
         }
+
+        if (jsonPath == null || jsonPath.isEmpty()) {
+            // Checked after parsing, where reading from a path string used to check it, so the two
+            // implementations report the same failure first. Compiling would blame the json argument.
+            throw new IllegalArgumentException("path can not be null or empty");
+        }
+
+        // Compile the path here rather than letting json-path read it from a string. A compiled path
+        // is not immutable: evaluating a function that takes a path argument — concat($.key, …) and
+        // friends — makes json-path store the value extracted from the current document inside the
+        // compiled object. Reading from a string goes through the compilation cache of CacheProvider,
+        // which is JVM-wide, so a single instance would carry that value across event loops and hand
+        // one request the payload of another. Compiling per call keeps it local to this evaluation.
+        return document.read(JsonPath.compile(jsonPath, predicates));
     }
 }

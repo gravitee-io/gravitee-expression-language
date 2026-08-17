@@ -40,4 +40,18 @@ public class JsonPathTest {
         value = JsonPathFunction.evaluate(context2, "concat(\"/\", $.key)");
         Assertions.assertEquals("/second", value);
     }
+
+    @Test
+    public void shouldRejectNullOrEmptyPath() {
+        Map<String, String> context = new HashMap<>();
+        context.put("key", "value");
+
+        for (String path : new String[] { null, "" }) {
+            IllegalArgumentException thrown = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> JsonPathFunction.evaluate(context, path)
+            );
+            Assertions.assertEquals("path can not be null or empty", thrown.getMessage());
+        }
+    }
 }
