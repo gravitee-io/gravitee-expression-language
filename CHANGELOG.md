@@ -1,3 +1,10 @@
+## [4.4.1](https://github.com/gravitee-io/gravitee-expression-language/compare/4.4.0...4.4.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* compile json paths per evaluation instead of sharing the JVM-wide cache ([5288570](https://github.com/gravitee-io/gravitee-expression-language/commit/5288570dc0aa887d0dc6dfe996658b98855ac08f))
+
 # [4.4.0](https://github.com/gravitee-io/gravitee-expression-language/compare/4.3.0...4.4.0) (2026-06-29)
 
 
