@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -92,19 +93,67 @@ public class SecuredResolver {
             return methodsByTypeAndSuperTypes.get(type);
         }
 
-        Method[] methods = methodsByType.getOrDefault(type, EMPTY);
+        Method[] ownMethods = methodsByType.getOrDefault(type, EMPTY);
+        Method[] inherited = EMPTY;
 
         if (type.getSuperclass() != null) {
-            methods = Stream.concat(Arrays.stream(methods), Arrays.stream(getMethods(type.getSuperclass()))).toArray(Method[]::new);
+            inherited = Stream.concat(Arrays.stream(inherited), Arrays.stream(getMethods(type.getSuperclass()))).toArray(Method[]::new);
         }
 
         for (Class<?> anInterface : type.getInterfaces()) {
-            methods = Stream.concat(Arrays.stream(methods), Arrays.stream(getMethods(anInterface))).toArray(Method[]::new);
+            inherited = Stream.concat(Arrays.stream(inherited), Arrays.stream(getMethods(anInterface))).toArray(Method[]::new);
         }
+
+        // Method.invoke() dispatches virtually: whitelisting an ancestor's method must not
+        // implicitly authorize `type` to run its own, unreviewed override of that same method.
+        // Drop any inherited candidate that `type` shadows, unless `type`'s own override was
+        // independently whitelisted.
+        Method[] notShadowed = Arrays
+            .stream(inherited)
+            .filter(inheritedMethod -> !isShadowedByUnwhitelistedOverride(type, ownMethods, inheritedMethod))
+            .toArray(Method[]::new);
+
+        Method[] methods = Stream.concat(Arrays.stream(ownMethods), Arrays.stream(notShadowed)).toArray(Method[]::new);
 
         methodsByTypeAndSuperTypes.put(type, methods);
 
         return methods;
+    }
+
+    private static boolean isShadowedByUnwhitelistedOverride(Class<?> type, Method[] ownWhitelistedMethods, Method inheritedMethod) {
+        if (type.equals(inheritedMethod.getDeclaringClass())) {
+            return false;
+        }
+
+        if (Modifier.isAbstract(inheritedMethod.getModifiers())) {
+            // No reviewed implementation to bypass: an abstract method (typically declared on an
+            // interface, e.g. Collection#contains) has no body of its own, so every implementing
+            // class is expected -- and required -- to provide one. That's ordinary polymorphism,
+            // not an unreviewed override of already-vetted behavior.
+            return false;
+        }
+
+        Method override = findDeclaredMethod(type, inheritedMethod.getName(), inheritedMethod.getParameterTypes());
+        if (override == null) {
+            // `type` does not redeclare this method: it truly inherits the whitelisted implementation unchanged.
+            return false;
+        }
+
+        // `type` shadows/overrides a *concrete* whitelisted method: only trust it if `type`'s own
+        // override was independently whitelisted.
+        return Arrays.stream(ownWhitelistedMethods).noneMatch(m -> hasSameSignature(m, override));
+    }
+
+    private static Method findDeclaredMethod(Class<?> type, String name, Class<?>[] parameterTypes) {
+        try {
+            return type.getDeclaredMethod(name, parameterTypes);
+        } catch (NoSuchMethodException e) {
+            return null;
+        }
+    }
+
+    private static boolean hasSameSignature(Method a, Method b) {
+        return a.getName().equals(b.getName()) && Arrays.equals(a.getParameterTypes(), b.getParameterTypes());
     }
 
     protected boolean isConstructorAllowed(Constructor<?> constructor) {
