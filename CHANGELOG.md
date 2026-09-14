@@ -1,3 +1,10 @@
+# [4.5.0](https://github.com/gravitee-io/gravitee-expression-language/compare/4.4.1...4.5.0) (2026-09-14)
+
+
+### Features
+
+* allow the credentials EL accessor ([#155](https://github.com/gravitee-io/gravitee-expression-language/issues/155)) ([1198f5f](https://github.com/gravitee-io/gravitee-expression-language/commit/1198f5fc96070263f109002ced3bda96ccd5a3e0))
+
 ## [4.4.1](https://github.com/gravitee-io/gravitee-expression-language/compare/4.4.0...4.4.1) (2026-08-17)
 
 
