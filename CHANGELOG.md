@@ -1,3 +1,10 @@
+## [4.5.1](https://github.com/gravitee-io/gravitee-expression-language/compare/4.5.0...4.5.1) (2026-09-15)
+
+
+### Bug Fixes
+
+* remove the gateway credentials accessor from the whitelist ([2354ae5](https://github.com/gravitee-io/gravitee-expression-language/commit/2354ae50531b8678dd20d888358be9e569ec158b))
+
 # [4.5.0](https://github.com/gravitee-io/gravitee-expression-language/compare/4.4.1...4.5.0) (2026-09-14)
 
 
