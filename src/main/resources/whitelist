@@ -95,6 +95,5 @@ method io.gravitee.secrets.api.el.EvaluatedSecretsMethods get java.lang.String j
 method io.gravitee.secrets.api.el.DelegatingEvaluatedSecretsMethods fromGrant java.lang.String io.gravitee.secrets.api.el.SecretFieldAccessControl
 method io.gravitee.secrets.api.el.DelegatingEvaluatedSecretsMethods fromGrant java.lang.String java.lang.String io.gravitee.secrets.api.el.SecretFieldAccessControl
 method io.gravitee.secrets.api.el.DelegatingEvaluatedSecretsMethods fromEL java.lang.String java.lang.String io.gravitee.secrets.api.el.SecretFieldAccessControl
-method io.gravitee.gateway.reactive.handlers.api.el.EvaluatedCredentialsMethods get java.lang.String java.lang.String io.gravitee.secrets.api.el.SecretFieldAccessControl
 
 # Allows by constructor signatures
