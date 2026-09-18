@@ -1,3 +1,10 @@
+# [4.6.0](https://github.com/gravitee-io/gravitee-expression-language/compare/4.5.1...4.6.0) (2026-09-18)
+
+
+### Features
+
+* whitelist the secret field reference EL accessor ([cba08b2](https://github.com/gravitee-io/gravitee-expression-language/commit/cba08b2752a2d99916eedd0d86a40d2335f4e43f))
+
 ## [4.5.1](https://github.com/gravitee-io/gravitee-expression-language/compare/4.5.0...4.5.1) (2026-09-15)
 
 
