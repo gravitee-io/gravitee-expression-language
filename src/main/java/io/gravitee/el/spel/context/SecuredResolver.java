@@ -121,9 +121,10 @@ public class SecuredResolver {
             // Built-in whitelist will be loaded only if mode is 'append' ( as opposed to 'replace').
             loadBuiltInWhitelist = APPEND_WHITELIST_MODE.equals(environment.getProperty(EL_WHITELIST_MODE_KEY, APPEND_WHITELIST_MODE));
 
-            Collection<Object> configWhitelist = EnvironmentUtils
-                .getPropertiesStartingWith((ConfigurableEnvironment) environment, EL_WHITELIST_LIST_KEY)
-                .values();
+            Collection<Object> configWhitelist = EnvironmentUtils.getPropertiesStartingWith(
+                (ConfigurableEnvironment) environment,
+                EL_WHITELIST_LIST_KEY
+            ).values();
 
             for (Object declaration : configWhitelist) {
                 parseDeclaration(String.valueOf(declaration), methods, constructors);

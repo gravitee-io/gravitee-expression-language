@@ -46,22 +46,23 @@ class TemplateVariableFactoryTest {
         );
 
         // mimic what BeanFactoryUtils.beanNamesForTypeIncludingAncestors should return
-        when(applicationContext.getBeanNamesForType(TemplateVariableProvider.class))
-            .thenReturn(
-                new String[] {
-                    APITemplateVariableProvider.class.getSimpleName(),
-                    WrongScopeTemplateVariableProvider.class.getSimpleName(),
-                    UnAnnotatedTestTemplateProvider.class.getSimpleName(),
-                }
-            );
+        when(applicationContext.getBeanNamesForType(TemplateVariableProvider.class)).thenReturn(
+            new String[] {
+                APITemplateVariableProvider.class.getSimpleName(),
+                WrongScopeTemplateVariableProvider.class.getSimpleName(),
+                UnAnnotatedTestTemplateProvider.class.getSimpleName(),
+            }
+        );
         when(applicationContext.getParentBeanFactory()).thenReturn(null);
 
         // mimic beans being returned
         when(applicationContext.getBean(APITemplateVariableProvider.class.getSimpleName())).thenReturn(new APITemplateVariableProvider());
-        when(applicationContext.getBean(WrongScopeTemplateVariableProvider.class.getSimpleName()))
-            .thenReturn(new UnAnnotatedTestTemplateProvider());
-        when(applicationContext.getBean(UnAnnotatedTestTemplateProvider.class.getSimpleName()))
-            .thenReturn(new WrongScopeTemplateVariableProvider());
+        when(applicationContext.getBean(WrongScopeTemplateVariableProvider.class.getSimpleName())).thenReturn(
+            new UnAnnotatedTestTemplateProvider()
+        );
+        when(applicationContext.getBean(UnAnnotatedTestTemplateProvider.class.getSimpleName())).thenReturn(
+            new WrongScopeTemplateVariableProvider()
+        );
 
         // check that among those three beans only one is selected
         assertThat(underTest.getTemplateVariableProviders()).hasSize(1);

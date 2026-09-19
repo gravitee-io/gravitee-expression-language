@@ -48,8 +48,7 @@ public class SpelExpressionParser {
     private static final int CACHE_EXPRESSION_IDLE_MILLIS = 3600000;
 
     static {
-        final CacheConfiguration cacheConfiguration = CacheConfiguration
-            .builder()
+        final CacheConfiguration cacheConfiguration = CacheConfiguration.builder()
             .maxSize(CACHE_EXPRESSION_MAX_SIZE)
             .timeToIdleInMs(CACHE_EXPRESSION_IDLE_MILLIS)
             .build();
@@ -70,8 +69,10 @@ public class SpelExpressionParser {
     }
 
     public Expression parseExpression(String expression) {
-        return getParser()
-            .parseExpression(EXPRESSION_REGEX_PATTERN.matcher(expression).replaceAll(EXPRESSION_REGEX_SUBSTITUTE), getParserContext());
+        return getParser().parseExpression(
+            EXPRESSION_REGEX_PATTERN.matcher(expression).replaceAll(EXPRESSION_REGEX_SUBSTITUTE),
+            getParserContext()
+        );
     }
 
     protected ParserContext getParserContext() {
@@ -80,10 +81,9 @@ public class SpelExpressionParser {
 
     org.springframework.expression.spel.standard.SpelExpressionParser getParser() {
         if (expressionParser == null) {
-            expressionParser =
-                new org.springframework.expression.spel.standard.SpelExpressionParser(
-                    new SpelParserConfiguration(SpelCompilerMode.MIXED, this.getClass().getClassLoader())
-                );
+            expressionParser = new org.springframework.expression.spel.standard.SpelExpressionParser(
+                new SpelParserConfiguration(SpelCompilerMode.MIXED, this.getClass().getClassLoader())
+            );
         }
 
         return expressionParser;

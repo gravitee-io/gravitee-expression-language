@@ -37,15 +37,13 @@ public abstract class AbstractSpringFactoriesLoaderTemplateVariableProviderFacto
     @Override
     public List<TemplateVariableProvider> getTemplateVariableProviders() {
         if (providers == null) {
-            providers =
-                Stream
-                    .of(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, TemplateVariableProvider.class))
-                    .map(name -> (TemplateVariableProvider) applicationContext.getBean(name))
-                    .filter(provider -> {
-                        TemplateVariable annotation = provider.getClass().getAnnotation(TemplateVariable.class);
-                        return annotation != null && Arrays.asList(annotation.scopes()).contains(getTemplateVariableScope());
-                    })
-                    .toList();
+            providers = Stream.of(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, TemplateVariableProvider.class))
+                .map(name -> (TemplateVariableProvider) applicationContext.getBean(name))
+                .filter(provider -> {
+                    TemplateVariable annotation = provider.getClass().getAnnotation(TemplateVariable.class);
+                    return annotation != null && Arrays.asList(annotation.scopes()).contains(getTemplateVariableScope());
+                })
+                .toList();
         }
         return providers;
     }

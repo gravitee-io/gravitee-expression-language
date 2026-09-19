@@ -38,7 +38,7 @@ public class DocumentBuilderFactoryUtils {
         } catch (IllegalArgumentException var8) {
             LOGGER.warn(
                 "http://javax.xml.XMLConstants/property/accessExternalDTD property not supported by " +
-                factory.getClass().getCanonicalName()
+                    factory.getClass().getCanonicalName()
             );
         }
 
@@ -47,7 +47,7 @@ public class DocumentBuilderFactoryUtils {
         } catch (IllegalArgumentException var7) {
             LOGGER.warn(
                 "http://javax.xml.XMLConstants/property/accessExternalSchema property not supported by " +
-                factory.getClass().getCanonicalName()
+                    factory.getClass().getCanonicalName()
             );
         }
 
@@ -56,7 +56,7 @@ public class DocumentBuilderFactoryUtils {
         } catch (ParserConfigurationException var6) {
             LOGGER.warn(
                 "FEATURE 'http://apache.org/xml/features/disallow-doctype-decl' is probably not supported by " +
-                factory.getClass().getCanonicalName()
+                    factory.getClass().getCanonicalName()
             );
         }
 
@@ -65,7 +65,7 @@ public class DocumentBuilderFactoryUtils {
         } catch (ParserConfigurationException var5) {
             LOGGER.warn(
                 "FEATURE 'http://xml.org/sax/features/external-general-entities' is probably not supported by " +
-                factory.getClass().getCanonicalName()
+                    factory.getClass().getCanonicalName()
             );
         }
 
@@ -74,7 +74,7 @@ public class DocumentBuilderFactoryUtils {
         } catch (ParserConfigurationException var4) {
             LOGGER.warn(
                 "FEATURE 'http://xml.org/sax/features/external-parameter-entities' is probably not supported by " +
-                factory.getClass().getCanonicalName()
+                    factory.getClass().getCanonicalName()
             );
         }
 
@@ -83,7 +83,7 @@ public class DocumentBuilderFactoryUtils {
         } catch (ParserConfigurationException var3) {
             LOGGER.warn(
                 "FEATURE 'http://apache.org/xml/features/nonvalidating/load-external-dtd' is probably not supported by " +
-                factory.getClass().getCanonicalName()
+                    factory.getClass().getCanonicalName()
             );
         }
 

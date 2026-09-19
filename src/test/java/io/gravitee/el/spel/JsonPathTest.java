@@ -47,9 +47,8 @@ public class JsonPathTest {
         context.put("key", "value");
 
         for (String path : new String[] { null, "" }) {
-            IllegalArgumentException thrown = Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> JsonPathFunction.evaluate(context, path)
+            IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
+                JsonPathFunction.evaluate(context, path)
             );
             Assertions.assertEquals("path can not be null or empty", thrown.getMessage());
         }

@@ -104,8 +104,7 @@ public class SpelTemplateContext implements TemplateContext {
 
     public Single<EvaluationContext> evaluationContext(CachedExpression expression) {
         if (deferredVariables != null) {
-            return Flowable
-                .fromIterable(deferredVariables.entrySet())
+            return Flowable.fromIterable(deferredVariables.entrySet())
                 .filter(deferredEntry -> requiresDeferredVariable(expression, deferredEntry))
                 .flatMapCompletable(e -> resolveDeferred(e.getKey(), e.getValue()))
                 .andThen(Single.just(context));
