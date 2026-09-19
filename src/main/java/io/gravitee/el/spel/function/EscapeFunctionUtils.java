@@ -32,8 +32,7 @@ public final class EscapeFunctionUtils {
             return collection.stream().map(EscapeFunctionUtils::elementToText).collect(Collectors.joining(" "));
         }
         if (input.getClass().isArray()) {
-            return IntStream
-                .range(0, Array.getLength(input))
+            return IntStream.range(0, Array.getLength(input))
                 .mapToObj(index -> elementToText(Array.get(input, index)))
                 .collect(Collectors.joining(" "));
         }

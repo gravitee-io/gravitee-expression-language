@@ -116,8 +116,7 @@ class SpelTemplateEngineTest {
 
     @Test
     void should_transform_with_request_header_multiple_values() {
-        final HttpHeaders headers = HttpHeaders
-            .create()
+        final HttpHeaders headers = HttpHeaders.create()
             .add("X-Gravitee-Endpoint", "my_api_host")
             .add("X-Gravitee-Endpoint", "my_api_host2");
 
@@ -132,8 +131,7 @@ class SpelTemplateEngineTest {
 
     @Test
     void should_transform_with_request_header_multiple_values_with_index() {
-        final HttpHeaders headers = HttpHeaders
-            .create()
+        final HttpHeaders headers = HttpHeaders.create()
             .add("X-Gravitee-Endpoint", "my_api_host")
             .add("X-Gravitee-Endpoint", "my_api_host2");
 
@@ -276,15 +274,14 @@ class SpelTemplateEngineTest {
     @Test
     void should_xpath_function() {
         EvaluableRequest req = Mockito.mock(EvaluableRequest.class);
-        when(req.getContent())
-            .thenReturn(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+        when(req.getContent()).thenReturn(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                 "<root>" +
                 "<lastname>DOE</lastname>" +
                 "<firstname>JOHN</firstname>" +
                 "<age>35</age>" +
                 "</root>"
-            );
+        );
 
         TemplateEngine engine = TemplateEngine.templateEngine();
         engine.getTemplateContext().setVariable("request", req);
@@ -332,12 +329,10 @@ class SpelTemplateEngineTest {
         String content = "Hello {#name}";
 
         CountDownLatch latch = new CountDownLatch(1);
-        Vertx
-            .vertx()
-            .runOnContext(v -> {
-                assertThrows(ExpressionEvaluationException.class, () -> engine.evalBlocking(content, String.class));
-                latch.countDown();
-            });
+        Vertx.vertx().runOnContext(v -> {
+            assertThrows(ExpressionEvaluationException.class, () -> engine.evalBlocking(content, String.class));
+            latch.countDown();
+        });
 
         assertThat(latch.await(10, TimeUnit.SECONDS)).isEqualTo(true);
     }
@@ -606,10 +601,10 @@ class SpelTemplateEngineTest {
             .setVariable(
                 "profile",
                 "{ \"lastname\": \"DOE\", \"firstname\": \"JOHN\", \"age\": 35" +
-                ", \"groups\" : [\"Group1\", \"Group2\", \"Group3\"]" +
-                ", \"emptiness\" : []" +
-                ", \"nothingness\" : null" +
-                " }"
+                    ", \"groups\" : [\"Group1\", \"Group2\", \"Group3\"]" +
+                    ", \"emptiness\" : []" +
+                    ", \"nothingness\" : null" +
+                    " }"
             );
 
         String content = "{#jsonPath(#profile, '$.groups').contains('Group2')}";
@@ -942,11 +937,12 @@ class SpelTemplateEngineTest {
         engine.getTemplateContext().setVariable("request", new EvaluableRequest(request));
 
         TestObserver<LinkedHashMap> result = engine.eval("{ #request.headers.toSingleValueMap() }", LinkedHashMap.class).test();
-        result.assertValue(v ->
-            v.containsKey("X-Gravitee-Endpoint") &&
-            v.get("X-Gravitee-Endpoint").equals("my_api_host") &&
-            v.containsKey("X-Gravitee-Other") &&
-            v.get("X-Gravitee-Other").equals("value")
+        result.assertValue(
+            v ->
+                v.containsKey("X-Gravitee-Endpoint") &&
+                v.get("X-Gravitee-Endpoint").equals("my_api_host") &&
+                v.containsKey("X-Gravitee-Other") &&
+                v.get("X-Gravitee-Other").equals("value")
         );
     }
 
@@ -1138,8 +1134,10 @@ class SpelTemplateEngineTest {
         assertThat(clonedTemplateContext.getDeferredVariables()).isNotSameAs(originalTemplateContext.getDeferredVariables());
         assertThat(clonedTemplateContext.getDeferredFunctionsHolders()).isNotSameAs(originalTemplateContext.getDeferredFunctionsHolders());
 
-        assertThat(clonedTemplateContext.getVariables())
-            .contains(Map.entry("test", "hello"), Map.entry("defferedFunction", deferredFunctionHolder));
+        assertThat(clonedTemplateContext.getVariables()).contains(
+            Map.entry("test", "hello"),
+            Map.entry("defferedFunction", deferredFunctionHolder)
+        );
         assertThat(clonedTemplateContext.getDeferredVariables()).contains(Map.entry("defferedVariable", defferedValue));
         assertThat(clonedTemplateContext.getDeferredFunctionsHolders()).contains(Map.entry("defferedFunction", deferredFunctionHolder));
     }

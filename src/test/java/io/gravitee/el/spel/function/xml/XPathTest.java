@@ -40,21 +40,20 @@ public class XPathTest {
 
     @Test
     public void should_extract_child_node_value() {
-        final String input =
-            """
-            <S:Example xmlns:S="http://www.w3.org/2003/05/soap-envelope">
-                <S:Body>
-                    <Foo xmlns:ns2="dummy:example:ns" xmlns="another:dummy:ns">
-                        <Priority>500</Priority>
-                        <ListRessource>
-                            <Ressource>
-                                <Bar>/Baz</Bar>
-                            </Ressource>
-                        </ListRessource>
-                    </Foo>
-                </S:Body>
-            </S:Example>
-        """;
+        final String input = """
+                <S:Example xmlns:S="http://www.w3.org/2003/05/soap-envelope">
+                    <S:Body>
+                        <Foo xmlns:ns2="dummy:example:ns" xmlns="another:dummy:ns">
+                            <Priority>500</Priority>
+                            <ListRessource>
+                                <Ressource>
+                                    <Bar>/Baz</Bar>
+                                </Ressource>
+                            </ListRessource>
+                        </Foo>
+                    </S:Body>
+                </S:Example>
+            """;
         var result = XPathFunction.evaluate(input, ".//Bar");
         Assertions.assertEquals("/Baz", result);
     }
