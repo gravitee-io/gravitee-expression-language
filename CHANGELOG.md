@@ -1,3 +1,16 @@
+# [5.0.0](https://github.com/gravitee-io/gravitee-expression-language/compare/4.6.0...5.0.0) (2026-09-25)
+
+
+* chore(deps)!: move to the gravitee orb 5 and parent 23 ([726e839](https://github.com/gravitee-io/gravitee-expression-language/commit/726e83905a70a9b9cc193b285a1d3f938f2f8f65))
+
+
+### BREAKING CHANGES
+
+* the artifact is now compiled for Java 21, up from Java 17, and
+requires a Java 21 runtime or later.
+
+https://gravitee.atlassian.net/browse/BX-403
+
 # [4.6.0](https://github.com/gravitee-io/gravitee-expression-language/compare/4.5.1...4.6.0) (2026-09-18)
 
 
