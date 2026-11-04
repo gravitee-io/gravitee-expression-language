@@ -1,3 +1,10 @@
+## [5.0.1](https://github.com/gravitee-io/gravitee-expression-language/compare/5.0.0...5.0.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* addition of classes for risk assessment validation in AM ([c658448](https://github.com/gravitee-io/gravitee-expression-language/commit/c6584488f7eae4e9b6a1d5d474798f2113b6ba21))
+
 # [5.0.0](https://github.com/gravitee-io/gravitee-expression-language/compare/4.6.0...5.0.0) (2026-09-25)
 
 
