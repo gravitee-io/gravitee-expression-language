@@ -27,6 +27,10 @@ class java.util.Calendar
 
 class io.gravitee.gateway.api.el.EvaluableSSLPrincipal
 
+class io.gravitee.risk.assessment.api.assessment.AssessmentResult
+class io.gravitee.risk.assessment.api.assessment.AssessmentMessageResult
+class io.gravitee.risk.assessment.api.assessment.Assessment
+
 # Allows by method signatures
 method java.lang.Object equals java.lang.Object
 method java.lang.Object hashCode
@@ -96,5 +100,7 @@ method io.gravitee.secrets.api.el.DelegatingEvaluatedSecretsMethods fromGrant ja
 method io.gravitee.secrets.api.el.DelegatingEvaluatedSecretsMethods fromGrant java.lang.String java.lang.String io.gravitee.secrets.api.el.SecretFieldAccessControl
 method io.gravitee.secrets.api.el.DelegatingEvaluatedSecretsMethods fromEL java.lang.String java.lang.String io.gravitee.secrets.api.el.SecretFieldAccessControl
 method io.gravitee.secrets.api.el.SecretFieldReferenceMethods get java.lang.String java.lang.String io.gravitee.secrets.api.el.SecretFieldAccessControl
+
+method java.lang.Enum name
 
 # Allows by constructor signatures
